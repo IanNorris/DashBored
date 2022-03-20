@@ -1,0 +1,43 @@
+﻿@using System.Text
+@inherits LayoutComponentBase
+
+<div class="card mb-4 @GetClasses()">
+    @if(Title != null)
+    {
+        <h5 class="card-header">@Title</h5>
+    }
+    <div class="card-body">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent {get;set;}
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Colour { get; set; }
+
+    [Parameter]
+    public bool WhiteText { get; set; } = false;
+
+    private string GetClasses()
+    {
+        var sb = new StringBuilder();
+        if(WhiteText)
+        {
+            sb.Append(" text-white");
+        }
+
+        if(Colour != null)
+        {
+            sb.Append(" bg-");
+            sb.Append(Colour);
+        }
+
+        return sb.ToString();
+    }
+}
