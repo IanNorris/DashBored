@@ -1,7 +1,7 @@
 ﻿@using System.Text
 @inherits LayoutComponentBase
 
-<div class="card mb-4 @GetClasses()">
+<div class="card mb-4 @GetClasses()" style="@Style">
     @if(Title != null)
     {
         <h5 class="card-header">@Title</h5>
@@ -20,6 +20,9 @@
 
     [Parameter]
     public string? Colour { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
 
     [Parameter]
     public bool WhiteText { get; set; } = false;

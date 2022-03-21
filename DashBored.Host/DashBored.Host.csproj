@@ -14,4 +14,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DashBored.PluginApi\DashBored.PluginApi.csproj" />
+    <ProjectReference Include="..\Plugin.Clock\Plugin.Clock.csproj" />
+    <ProjectReference Include="..\Plugin.RTSP\Plugin.RTSP.csproj" />
+  </ItemGroup>
+
 </Project>

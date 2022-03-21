@@ -1,7 +1,20 @@
-﻿@inherits LayoutComponentBase
+﻿@using DashBored.Host.Data
+@inherits LayoutComponentBase
+
+@inject PageService Pages
 
 <PageTitle>Home</PageTitle>
 
-<Card Title="Loren Ipsum" Colour="success" WhiteText="true">
-	@Body
-</Card>
+<div class="dashboard-container">
+	@foreach(var page in Pages.Pages)
+	{
+		foreach(var tile in page.Tiles)
+		{
+			var gridArea = $"grid-area: {tile.Y}/{tile.X}/{tile.Y + tile.Height}/{tile.X + tile.Width}";
+
+			<Card Style="@gridArea">
+				<DynamicComponent Type="@tile.RazorType" />
+			</Card>
+		}
+	}
+</div>
