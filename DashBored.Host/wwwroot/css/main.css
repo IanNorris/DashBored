@@ -5,4 +5,15 @@
 	grid-template-rows: repeat(12, 1fr);
 	column-gap: 1em;
 	row-gap: 1em;
+	height: 1vh;
+}
+
+.card-content
+{
+	display: flex;
+}
+
+.no-padding
+{
+	padding: 0 0 0 0;
 }

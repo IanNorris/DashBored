@@ -1,4 +1,5 @@
 ﻿@using System.Text
+@using DashBored.PluginApi
 @inherits LayoutComponentBase
 
 <div class="card mb-4 @GetClasses()" style="@Style">
@@ -6,7 +7,7 @@
     {
         <h5 class="card-header">@Title</h5>
     }
-    <div class="card-body">
+    <div class="@GetContentClasses()">
         @ChildContent
     </div>
 </div>
@@ -25,6 +26,9 @@
     public string Style { get; set; }
 
     [Parameter]
+    public CardStyle CardStyle { get; set; }
+
+    [Parameter]
     public bool WhiteText { get; set; } = false;
 
     private string GetClasses()
@@ -40,6 +44,20 @@
             sb.Append(" bg-");
             sb.Append(Colour);
         }
+
+        return sb.ToString();
+    }
+
+    private string GetContentClasses()
+    {
+        var sb = new StringBuilder();
+        if(!CardStyle.Padding)
+        {
+            sb.Append("no-padding ");
+        }
+        sb.Append("card-body card-content ");
+        sb.Append(CardStyle.Classes);
+        
 
         return sb.ToString();
     }

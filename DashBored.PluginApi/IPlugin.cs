@@ -4,6 +4,7 @@ namespace DashBored.PluginApi
 	public interface IPlugin
 	{
 		static Type DataType { get; }
-		static Type RazorType { get; }
+		Type RazorType { get; }
+		public CardStyle CardStyle { get; }
 	}
 }

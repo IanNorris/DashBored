@@ -11,5 +11,6 @@ namespace DashBored.Host.Models
 
 		public IPlugin PluginInstance { get; set; }
 		public Type RazorType { get; set; }
+		public CardStyle CardStyle { get; set; }
 	}
 }

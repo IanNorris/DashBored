@@ -15,7 +15,8 @@ namespace DashBored.Host
 			foreach(var tile in layout.Tiles)
 			{
 				var pluginInstance = loader.CreateInstance(tile.Plugin, tile.Data);
-				var razorType = (Type)pluginInstance.GetType().GetProperty("RazorType", BindingFlags.Static | BindingFlags.Public).GetValue(null);
+				var razorType = pluginInstance.RazorType;
+				var cardStyle = pluginInstance.CardStyle;
 
 				var newColumn = new TileInstance()
 				{
@@ -23,6 +24,7 @@ namespace DashBored.Host
 					Width = tile.Width,
 					PluginInstance = pluginInstance,
 					RazorType = razorType,
+					CardStyle = cardStyle,
 					X = tile.X,
 					Y = tile.Y,
 				};
