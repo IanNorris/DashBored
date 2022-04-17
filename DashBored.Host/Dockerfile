@@ -5,6 +5,9 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+RUN mkdir /config
+VOLUME /config
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["DashBored.Host/DashBored.Host.csproj", "DashBored.Host/"]

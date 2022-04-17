@@ -10,11 +10,24 @@
 	{
 		foreach(var tile in page.Tiles)
 		{
-			var gridArea = $"grid-area: {tile.Y}/{tile.X}/{tile.Y + tile.Height}/{tile.X + tile.Width}";
+			var gridArea = $"grid-area: {tile.Y}/{tile.X}/{tile.Y + tile.Height - 1}/{tile.X + tile.Width - 1}";
+
+			//var parameters = tile.PluginInstance.Parameters;
+			var parameters = new Dictionary<string, object>()
+			{
+				{ "Model", tile.PluginInstance },
+			};
 
 			<Card Style="@gridArea" CardStyle="@tile.CardStyle">
-				<DynamicComponent Type="@tile.RazorType" />
+				<CascadingValue Value="@tile.PluginInstance" Name="Model">
+					<DynamicComponent Type="@tile.RazorType" Parameters="@parameters" />
+				</CascadingValue>
 			</Card>
 		}
 	}
 </div>
+
+@code
+{
+	
+}

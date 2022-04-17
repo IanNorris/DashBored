@@ -1,0 +1,32 @@
+﻿@implements IDisposable
+
+<div class="todo">
+<span>@PrettyTime</span>
+</div>
+
+@code {
+	[Parameter]
+	public Todo Model { get; set; }
+
+	Timer Timer;
+	string PrettyTime;
+
+	private void Update(object _)
+	{
+		PrettyTime = DateTime.Now.ToString("HH:mm:ss");
+
+		InvokeAsync(() => StateHasChanged());
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		Timer = new Timer(Update, new AutoResetEvent(false), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+	}
+
+	public void Dispose()
+	{
+		Timer?.Dispose();
+	}
+}

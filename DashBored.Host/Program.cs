@@ -22,7 +22,8 @@ var fileContent = File.ReadAllText(configPath);
 
 var layout = JsonConvert.DeserializeObject<Layout>(fileContent);
 
-var page = new Page(layout, pluginLoader);
+using var page = new Page(layout, pluginLoader);
+await page.Initialize();
 
 var pages = new List<Page>()
 {

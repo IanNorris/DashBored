@@ -3,8 +3,6 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: 2em;
-	font-size: 4em;
-	width: 100%;
-	height: 100%;
+	font-size: 4.5vmin;
+	margin: auto;
 }

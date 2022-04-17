@@ -1,4 +1,5 @@
 ﻿using DashBored.PluginApi;
+using Microsoft.AspNetCore.Components;
 
 namespace DashBored.Host.Models
 {

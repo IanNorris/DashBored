@@ -5,13 +5,17 @@ VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DashBored.Host", "DashBored.Host\DashBored.Host.csproj", "{BFC5B62B-B8F7-4239-AD8A-BC2CE4B257A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashBored.PluginApi", "DashBored.PluginApi\DashBored.PluginApi.csproj", "{EDA03EBF-4B81-4796-9FF8-D4C7291ED65C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DashBored.PluginApi", "DashBored.PluginApi\DashBored.PluginApi.csproj", "{EDA03EBF-4B81-4796-9FF8-D4C7291ED65C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{7280CAD8-48B4-4EBD-BBD9-2B24AB643BDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugin.Clock", "Plugin.Clock\Plugin.Clock.csproj", "{2F02BF71-3604-44DF-A8FB-8C619F293300}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Clock", "Plugin.Clock\Plugin.Clock.csproj", "{2F02BF71-3604-44DF-A8FB-8C619F293300}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugin.RTSP", "Plugin.RTSP\Plugin.RTSP.csproj", "{448439A0-4384-4E96-B3CA-BF14C22A89CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.RTSP", "Plugin.RTSP\Plugin.RTSP.csproj", "{448439A0-4384-4E96-B3CA-BF14C22A89CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Todo", "Plugin.Todo\Plugin.Todo.csproj", "{D88B7E9F-B675-413A-86B3-5C941F3EC800}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Weather", "Plugin.Weather\Plugin.Weather.csproj", "{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +39,14 @@ Global
 		{448439A0-4384-4E96-B3CA-BF14C22A89CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{448439A0-4384-4E96-B3CA-BF14C22A89CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{448439A0-4384-4E96-B3CA-BF14C22A89CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D88B7E9F-B675-413A-86B3-5C941F3EC800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D88B7E9F-B675-413A-86B3-5C941F3EC800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D88B7E9F-B675-413A-86B3-5C941F3EC800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D88B7E9F-B675-413A-86B3-5C941F3EC800}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,6 +54,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{2F02BF71-3604-44DF-A8FB-8C619F293300} = {7280CAD8-48B4-4EBD-BBD9-2B24AB643BDA}
 		{448439A0-4384-4E96-B3CA-BF14C22A89CF} = {7280CAD8-48B4-4EBD-BBD9-2B24AB643BDA}
+		{D88B7E9F-B675-413A-86B3-5C941F3EC800} = {7280CAD8-48B4-4EBD-BBD9-2B24AB643BDA}
+		{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C} = {7280CAD8-48B4-4EBD-BBD9-2B24AB643BDA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6BAEBB3F-907E-4F65-9D50-033FF5CD367A}

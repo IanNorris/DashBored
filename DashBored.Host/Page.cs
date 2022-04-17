@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 using DashBored.Host.Models;
 using DashBored.PluginApi;
+using Microsoft.AspNetCore.Components;
 
 namespace DashBored.Host
 {
-	public class Page
+	public class Page : IDisposable
 	{
 		public const int Dimension = 12;
 
@@ -37,6 +38,33 @@ namespace DashBored.Host
 			Tiles = tileList;
 		}
 
+		public async Task Initialize()
+		{
+			_timers = new List<PluginTimer>();
+
+			foreach (var tile in Tiles)
+			{
+				await tile.PluginInstance.OnInitialize();
+
+				foreach(var timer in tile.PluginInstance.TimerFrequencies)
+				{
+					_timers.Add(new PluginTimer(timer.Key, timer.Value, async (int timerIndex) => {
+						var result = await tile.PluginInstance.OnTimer(timerIndex);
+					}));
+				}
+			}
+		}
+
+		public void Dispose()
+		{
+			foreach(var timer in _timers)
+			{
+				timer.Dispose();
+			}
+		}
+
 		public List<TileInstance> Tiles { get; private set; }
+
+		private List<PluginTimer> _timers;
 	}
 }

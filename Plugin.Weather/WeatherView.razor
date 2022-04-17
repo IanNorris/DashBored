@@ -1,0 +1,45 @@
+﻿@using DashBored.PluginApi
+@inherits PluginComponent<Weather>
+
+<div class="weather">
+	<div class="weather-row">
+		<div class="weather-col-4">
+			<img src="@Model.GetWeatherIcon(Model.GetToday(), true)" />
+		</div>
+		<div class="weather-col-4 weather-bigfont">
+			<span>@Model.GetWeatherDescription(Model.GetToday())</span>
+		</div>
+
+		<div class="weather-col-4 weather-bigfont">
+			<div>@Model.GetWeatherValue(Model.GetToday(), "temperature")@Model.GetTemperatureUnit()</div>
+			<div class="weather-feels-like"><small><span>Feels like: @Model.GetWeatherValue(Model.GetToday(), "temperatureApparent")@Model.GetTemperatureUnit()</span></small></div>
+		</div>
+	</div>
+
+	<div class="weather-row pt-2">
+		<div class="weather-col-12">
+			<table>
+				<tr>
+					<th></th>
+					<th class="value"><b>Today</b></th>
+					<th class="value"><b>Tomorrow</b></th>
+				</tr>
+				@{
+					IDictionary<string, List<string>> table = new Dictionary<string, List<string>>();
+					Model.GetStatTable(ref table, Model.GetToday());
+					Model.GetStatTable(ref table, Model.GetTomorrow());
+				}
+				@foreach(var row in table)
+				{
+					<tr>
+						<td class="key"><b>@((MarkupString)row.Key)</b></td>
+						@foreach(var value in row.Value)
+						{
+							<td class="value">@((MarkupString)value)</td>
+						}
+					</tr>
+				}
+			</table>
+		</div>
+	</div>
+</div>
