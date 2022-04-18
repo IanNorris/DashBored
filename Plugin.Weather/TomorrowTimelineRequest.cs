@@ -9,12 +9,12 @@ namespace Plugin.Weather
 	{
 		public string Error { get; private set; }
 
-		public TomorrowTimelineRequest(string apiKey, double longitude, double latitude, string units, string timezone)
+		public TomorrowTimelineRequest(string apiKey, double latitude, double longitude, string units, string timezone)
 		{
 			_client = new HttpClient();
 			_apiKey = apiKey;
-			_longitude = longitude;
 			_latitude = latitude;
+			_longitude = longitude;
 			_units = units;
 			_timezone = timezone;
 		}
@@ -57,8 +57,8 @@ namespace Plugin.Weather
 		HttpClient _client;
 
 		string _apiKey;
-		double _longitude;
 		double _latitude;
+		double _longitude;
 		string _units;
 		string _timezone;
 

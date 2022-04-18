@@ -31,21 +31,12 @@ namespace Plugin.Weather
 		public Weather(WeatherData data)
 		{
 			_data = data;
-			_requestClient = new TomorrowTimelineRequest(data.ApiKey, data.Longitude, data.Latitude, data.Units, data.Timezone);
+			_requestClient = new TomorrowTimelineRequest(data.ApiKey, data.Latitude, data.Longitude, data.Units, data.Timezone);
 		}
 
 		public async Task<bool> OnInitialize()
 		{
-			var response = await _requestClient.CreateRequest();
-
-			if(response != null)
-			{
-				CurrentWeather = response;
-			}
-			else
-			{
-				Error = "Error!";
-			}
+			await UpdateData();
 
 			Error = null;
 			return true;
@@ -53,7 +44,13 @@ namespace Plugin.Weather
 
 		public async Task<bool> OnTimer(int _)
 		{
-			_requestClient = new TomorrowTimelineRequest(_data.ApiKey, _data.Latitude, _data.Longitude, _data.Units, _data.Timezone);
+			await UpdateData();
+
+			return true;
+		}
+
+		private async Task<bool> UpdateData()
+		{
 			var response = await _requestClient.CreateRequest();
 
 			if (response != null)
@@ -63,6 +60,7 @@ namespace Plugin.Weather
 			else
 			{
 				Error = "Error!";
+				return false;
 			}
 
 			if (OnDataChanged != null)
