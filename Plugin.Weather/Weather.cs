@@ -15,7 +15,7 @@ namespace Plugin.Weather
 
 		public Dictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
-			{ 0, 3 * 60 * 60 * 1000 }, //3 hours
+			{ 0, 30 * 60 * 1000 }, //30 mins
 		};
 
 		public string Error { get; set; }
@@ -53,9 +53,7 @@ namespace Plugin.Weather
 
 		public async Task<bool> OnTimer(int _)
 		{
-			var randomLat = (Random.Shared.NextDouble() - 0.5) * 90.0;
-			var randomLong = (Random.Shared.NextDouble() - 0.5) * 180.0;
-			_requestClient = new TomorrowTimelineRequest(_data.ApiKey, randomLat, randomLong, _data.Units, _data.Timezone);
+			_requestClient = new TomorrowTimelineRequest(_data.ApiKey, _data.Latitude, _data.Longitude, _data.Units, _data.Timezone);
 			var response = await _requestClient.CreateRequest();
 
 			if (response != null)
