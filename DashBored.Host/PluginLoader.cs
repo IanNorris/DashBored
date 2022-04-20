@@ -1,13 +1,17 @@
 ﻿using System.Reflection;
 using DashBored.PluginApi;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DashBored.Host
 {
 	public class PluginLoader
 	{
-		public void LoadPlugins()
+		public PluginLoader()
+		{
+			LoadPlugins();
+		}
+
+		private void LoadPlugins()
 		{
 			var mainAssembly = Assembly.GetExecutingAssembly();
 			LoadPluginsForAssembly(mainAssembly);

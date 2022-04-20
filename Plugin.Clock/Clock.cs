@@ -6,9 +6,14 @@ namespace Plugin.Clock
 	{
 		public static Type DataType => typeof(ClockData);
 		public Type RazorType => typeof(ClockView);
-		public Dictionary<int, int> TimerFrequencies => new Dictionary<int, int>
+		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
 			{ 0, 1000 },
+		};
+
+		public IEnumerable<Secret> Secrets => new List<Secret>
+		{
+
 		};
 
 		public CardStyle CardStyle => new CardStyle
@@ -20,7 +25,7 @@ namespace Plugin.Clock
 
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
 
-		public Task<bool> OnInitialize()
+		public Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
 			Error = null;
 			return Task.FromResult(true);

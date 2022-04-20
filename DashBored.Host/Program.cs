@@ -1,43 +1,21 @@
 using DashBored.Host;
 using DashBored.Host.Data;
-using DashBored.Host.Models;
-using Newtonsoft.Json;
 
 var pluginLoader = new PluginLoader();
-pluginLoader.LoadPlugins();
 
 var builder = WebApplication.CreateBuilder(args);
-
-var folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DashBored");
-var configPath = Path.Combine(folderPath, "Layout.json");
-var secretsPath = Path.Combine(folderPath, "Secrets.json");
-
-if(!File.Exists(configPath))
-{
-	Console.Error.WriteLine($"Layout file {configPath} does not exist.");
-	Environment.Exit(1);
-}
-
-var fileContent = File.ReadAllText(configPath);
-
-var layout = JsonConvert.DeserializeObject<Layout>(fileContent);
-
-using var page = new Page(layout, pluginLoader);
-await page.Initialize();
-
-var pages = new List<Page>()
-{
-	page
-};
-
-var pageService = new PageService(pages);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<PageService>(pageService);
+builder.Services.AddDataProtection();
+builder.Services.AddSingleton<PluginLoader>();
+builder.Services.AddSingleton<SecretService>();
+builder.Services.AddSingleton<PageService>();
 
 var app = builder.Build();
+
+await app.Services.GetRequiredService<PageService>().LoadPages();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

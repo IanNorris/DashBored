@@ -13,9 +13,19 @@ namespace Plugin.Weather
 			Padding = false,
 		};
 
-		public Dictionary<int, int> TimerFrequencies => new Dictionary<int, int>
+		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
 			{ 0, 30 * 60 * 1000 }, //30 mins
+		};
+
+		public IEnumerable<Secret> Secrets => new List<Secret>
+		{
+			new Secret
+			{
+				Name = ApiKeySecret, 
+				DisplayName = "Api Key",
+				Description = "A Tomorrow.io Api Key"
+			}
 		};
 
 		public string Error { get; set; }
@@ -31,11 +41,21 @@ namespace Plugin.Weather
 		public Weather(WeatherData data)
 		{
 			_data = data;
-			_requestClient = new TomorrowTimelineRequest(data.ApiKey, data.Latitude, data.Longitude, data.Units, data.Timezone);
 		}
 
-		public async Task<bool> OnInitialize()
+		public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
+			var apiKey = pluginSecrets.GetSecret(ApiKeySecret);
+
+			if(apiKey == null)
+			{
+				Error = $"No Api Key specified";
+				await UpdateData();
+				return false;
+			}
+
+			_requestClient = new TomorrowTimelineRequest(apiKey, _data.Latitude, _data.Longitude, _data.Units, _data.Timezone);
+
 			await UpdateData();
 
 			Error = null;
@@ -51,24 +71,29 @@ namespace Plugin.Weather
 
 		private async Task<bool> UpdateData()
 		{
-			var response = await _requestClient.CreateRequest();
-
-			if (response != null)
+			if (_requestClient != null)
 			{
-				CurrentWeather = response;
-			}
-			else
-			{
-				Error = "Error!";
-				return false;
+				var response = await _requestClient.CreateRequest();
+
+				if (response != null)
+				{
+					CurrentWeather = response;
+				}
+				else
+				{
+					Error = "Error!";
+					return false;
+				}
+
+				if (OnDataChanged != null)
+				{
+					OnDataChanged.Invoke();
+				}
+
+				return true;
 			}
 
-			if (OnDataChanged != null)
-			{
-				OnDataChanged.Invoke();
-			}
-
-			return true;
+			return false;
 		}
 
 		public string GetWeatherIcon(Dictionary<string, decimal> day, bool large)
@@ -334,6 +359,8 @@ namespace Plugin.Weather
 
 			return $@"<span class=""badge bg-{colour}"">{label}</span>";
 		}
+
+		private const string ApiKeySecret = "ApiKey";
 
 		public Dictionary<int, string> WeatherCodes = new Dictionary<int, string>
 		{

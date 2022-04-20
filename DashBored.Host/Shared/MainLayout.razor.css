@@ -13,3 +13,21 @@ body
 {
     font-family: "Poppins Regular" sans-serif !important;
 }
+
+.secrets
+{
+    position: fixed;
+    bottom: 0.5em;
+    right: 0.5em;
+    opacity: 33%;
+}
+
+.error-message
+{
+    margin: auto;
+}
+
+.blazor-modal-show
+{
+    display: block;
+}

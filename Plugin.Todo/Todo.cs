@@ -13,10 +13,16 @@ namespace Plugin.Todo
 			Padding = true,
 		};
 
-		public Dictionary<int, int> TimerFrequencies => new Dictionary<int, int>
+		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
 			{ 0, 5 * 60 * 1000 }, //5m
 		};
+
+		public IEnumerable<Secret> Secrets => new List<Secret>
+		{
+
+		};
+
 		public string Error { get; set; }
 
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
@@ -35,7 +41,7 @@ namespace Plugin.Todo
 			*/
 		}
 
-		public Task<bool> OnInitialize()
+		public Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
 			return Task.FromResult(true);
 		}

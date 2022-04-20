@@ -1,7 +1,5 @@
-﻿using System.Reflection;
+﻿using DashBored.Host.Data;
 using DashBored.Host.Models;
-using DashBored.PluginApi;
-using Microsoft.AspNetCore.Components;
 
 namespace DashBored.Host
 {
@@ -23,7 +21,9 @@ namespace DashBored.Host
 				{
 					Height = tile.Height,
 					Width = tile.Width,
+					Title = tile.Title,
 					PluginInstance = pluginInstance,
+					PluginNamespace = $"{tile.Plugin}.{tile.Title}",
 					RazorType = razorType,
 					CardStyle = cardStyle,
 					X = tile.X,
@@ -38,13 +38,18 @@ namespace DashBored.Host
 			Tiles = tileList;
 		}
 
-		public async Task Initialize()
+		public async Task Initialize(SecretService secretService)
 		{
 			_timers = new List<PluginTimer>();
 
 			foreach (var tile in Tiles)
 			{
-				await tile.PluginInstance.OnInitialize();
+				tile.PluginSecrets = secretService.CreatePluginSecrets(tile.PluginNamespace, async ps =>
+				{
+					await tile.PluginInstance.OnInitialize(ps);
+				});
+
+				await tile.PluginInstance.OnInitialize(tile.PluginSecrets);
 
 				foreach(var timer in tile.PluginInstance.TimerFrequencies)
 				{

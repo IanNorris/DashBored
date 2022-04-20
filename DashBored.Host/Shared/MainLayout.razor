@@ -1,6 +1,8 @@
 ﻿@using DashBored.Host.Data
+@using DashBored.Host.Models
 @inherits LayoutComponentBase
 
+@inject IJSRuntime JS
 @inject PageService Pages
 
 <PageTitle>Home</PageTitle>
@@ -19,15 +21,146 @@
 			};
 
 			<Card Style="@gridArea" CardStyle="@tile.CardStyle">
-				<CascadingValue Value="@tile.PluginInstance" Name="Model">
-					<DynamicComponent Type="@tile.RazorType" Parameters="@parameters" />
-				</CascadingValue>
+				@if(tile.PluginInstance.Error != null)
+				{
+					<div class="alert alert-danger error-message" role="alert">
+						⚠️ @tile.PluginInstance.Error
+                    </div>
+					<p></p>
+				}
+				else
+				{
+					<CascadingValue Value="@tile.PluginInstance" Name="Model">
+						<DynamicComponent Type="@tile.RazorType" Parameters="@parameters" />
+					</CascadingValue>
+				}
 			</Card>
 		}
 	}
 </div>
 
+<div class="secrets">
+	<span data-bs-toggle="modal" data-bs-target="#settingsModal">π</span>
+</div>
+
+<div class="modal" id="settingsModal" tabindex="" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+			<div class="col-md-3">
+				<ul class="list-group">
+					@foreach(var page in Pages.Pages)
+					{
+						foreach(var tile in page.Tiles)
+						{
+							var activeClass = tile.Id == SelectedTile ? "active" : "";
+							var errorIcon = tile.PluginInstance.Error != null ? "⚠️" : "";
+
+							<a href="#" class="list-group-item list-group-item-action @activeClass" aria-current="true" @onclick="@(e => SetActiveTile(tile))">
+								<div class="d-flex w-100 justify-content-between">
+									<h5 class="mb-1">@tile.Title</h5>
+									<small>@errorIcon</small>
+								</div>
+								<p class="mb-1">@tile.PluginInstance.GetType().Name</p>
+							</a>
+						}
+					}
+                </ul>
+			</div>
+
+			<div class="col-md-9">
+				<table class="table table-striped">
+					<tr>
+						<th>Name</th>
+						<th>Description</th>
+						<th>Value</th>
+						<th>Has Value</th>
+					</tr>
+				@if(SelectedTile != null)
+				{
+					TileInstance selectedTile = null;
+
+					foreach(var page in Pages.Pages)
+					{
+						foreach(var tile in page.Tiles)
+						{
+							if(SelectedTile == tile.Id)
+							{
+								selectedTile = tile;
+								break;
+							}
+						}
+					}
+
+					if(selectedTile != null)
+					{
+						foreach(var secret in selectedTile.PluginInstance.Secrets)
+						{
+							var hasValue = selectedTile.PluginSecrets.GetSecret(secret.Name) != null;
+							var hasValueIcon = hasValue ? "✅" : "❌";
+
+							<tr @onclick="@(e => ShowSetSecretModal(selectedTile, secret.Name))">
+								<td>@secret.DisplayName</td>
+								<td>@secret.Description</td>
+								<td>
+									@if(IsEditing)
+									{
+										<input class="form-control" @onchange="@( ev => SetSecret((string)ev.Value))" @onfocusout="@( () => IsEditing = false )" type="text" autofocus/>
+									}
+									else
+									{
+										<i>Hidden (click to edit)</i>
+									}
+								</td>
+								<td>@hasValueIcon</td>
+							</tr>
+						
+						}
+					}
+				}
+				</table>
+			</div>
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @code
 {
-	
+	string SelectedTile { get; set; }
+	TileInstance SelectedInstance { get; set; }
+	string SelectedSecret { get; set; }
+	string NewSecretValue { get; set; } = "";
+	bool IsEditing { get; set; } = false;
+
+	public void SetActiveTile(TileInstance tile)
+	{
+		SelectedTile = tile.Id;
+	}
+
+	public void ShowSetSecretModal(TileInstance tileInstance, string secretName)
+	{
+		SelectedInstance = tileInstance;
+		SelectedSecret = secretName;
+		NewSecretValue = "";
+
+		IsEditing = true;
+	}
+
+	public void SetSecret(string newValue)
+	{
+		SelectedInstance.PluginSecrets.SetSecret(SelectedSecret, newValue);
+
+		NewSecretValue = null;
+		IsEditing = false;
+	}
 }
