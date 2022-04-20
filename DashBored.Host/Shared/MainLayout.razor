@@ -14,7 +14,6 @@
 		{
 			var gridArea = $"grid-area: {tile.Y}/{tile.X}/{tile.Y + tile.Height - 1}/{tile.X + tile.Width - 1}";
 
-			//var parameters = tile.PluginInstance.Parameters;
 			var parameters = new Dictionary<string, object>()
 			{
 				{ "Model", tile.PluginInstance },
@@ -26,7 +25,6 @@
 					<div class="alert alert-danger error-message" role="alert">
 						⚠️ @tile.PluginInstance.Error
                     </div>
-					<p></p>
 				}
 				else
 				{
@@ -101,25 +99,27 @@
 					{
 						foreach(var secret in selectedTile.PluginInstance.Secrets)
 						{
-							var hasValue = selectedTile.PluginSecrets.GetSecret(secret.Name) != null;
-							var hasValueIcon = hasValue ? "✅" : "❌";
+							if(secret.UserVisible)
+							{
+								var hasValue = selectedTile.PluginSecrets.GetSecret(secret.Name) != null;
+								var hasValueIcon = hasValue ? "✅" : "❌";
 
-							<tr @onclick="@(e => ShowSetSecretModal(selectedTile, secret.Name))">
-								<td>@secret.DisplayName</td>
-								<td>@secret.Description</td>
-								<td>
-									@if(IsEditing)
-									{
-										<input class="form-control" @onchange="@( ev => SetSecret((string)ev.Value))" @onfocusout="@( () => IsEditing = false )" type="text" autofocus/>
-									}
-									else
-									{
-										<i>Hidden (click to edit)</i>
-									}
-								</td>
-								<td>@hasValueIcon</td>
-							</tr>
-						
+								<tr @onclick="@(e => ShowSetSecretModal(selectedTile, secret.Name))">
+									<td>@secret.DisplayName</td>
+									<td>@secret.Description</td>
+									<td>
+										@if(IsEditing)
+										{
+											<input class="form-control" @onchange="@( ev => SetSecret((string)ev.Value))" @onfocusout="@( () => IsEditing = false )" type="text" autofocus/>
+										}
+										else
+										{
+											<i>Hidden (click to edit)</i>
+										}
+									</td>
+									<td>@hasValueIcon</td>
+								</tr>
+								}
 						}
 					}
 				}

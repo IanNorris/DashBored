@@ -24,7 +24,7 @@ namespace DashBored.Host
 			}
 		}
 
-		public IPlugin CreateInstance(string typeName, JObject pluginData)
+		public IPlugin CreateInstance(string typeName, JObject pluginData, string title)
 		{
 			var pluginContext = new PluginContext();
 
@@ -33,7 +33,7 @@ namespace DashBored.Host
 				var dataType = pluginType.GetProperty("DataType", BindingFlags.Static | BindingFlags.Public);
 				var pluginDataType = (Type)dataType.GetValue(null);
 
-				return (IPlugin)CreateInstanceWithDependencyInjection(pluginType, pluginContext, pluginDataType, pluginData);
+				return (IPlugin)CreateInstanceWithDependencyInjection(pluginType, pluginContext, pluginDataType, pluginData, title);
 			}
 			else
 			{
@@ -41,7 +41,7 @@ namespace DashBored.Host
 			}
 		}
 
-		private object CreateInstanceWithDependencyInjection(Type type, PluginContext pluginContext, Type dataType, JObject pluginData)
+		private object CreateInstanceWithDependencyInjection(Type type, PluginContext pluginContext, Type dataType, JObject pluginData, string title)
 		{
 			var constructors = type.GetConstructors();
 			foreach (var constructor in constructors.OrderByDescending(c => c.GetParameters().Length))
@@ -69,11 +69,18 @@ namespace DashBored.Host
 						parametersOut[parameterIndex] = convertedPluginData;
 					}
 
+					if(parameter.ParameterType == typeof(string))
+					{
+						parametersOut[parameterIndex] = title ?? "";
+					}
+
 					if (parametersOut[parameterIndex] == null)
 					{
 						success = false;
 						break;
 					}
+
+					parameterIndex++;
 				}
 
 				if (success)

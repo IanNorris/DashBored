@@ -13,7 +13,7 @@ namespace DashBored.Host
 
 			foreach(var tile in layout.Tiles)
 			{
-				var pluginInstance = loader.CreateInstance(tile.Plugin, tile.Data);
+				var pluginInstance = loader.CreateInstance(tile.Plugin, tile.Data, tile.Title);
 				var razorType = pluginInstance.RazorType;
 				var cardStyle = pluginInstance.CardStyle;
 

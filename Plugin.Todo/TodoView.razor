@@ -1,32 +1,34 @@
-﻿@implements IDisposable
+﻿@using DashBored.PluginApi
+@inherits PluginComponent<Todo>
 
 <div class="todo">
-<span>@PrettyTime</span>
+	@if(Model.Message != null)
+	{
+		<div class="alert alert-warning error-message" role="alert">
+			@Model.Message
+		</div>
+	}
+	else
+	{
+		<h4 class="mb-3">@Model.Title</h4>
+
+		<ul class="list-group list-group-borderless">
+            @lock(Model.TodoItems)
+            {
+                foreach(var item in Model.TodoItems)
+                {
+                    var guid = new Guid().ToString().Replace("-", "");
+
+                    <li class="list-group-item px-0">
+                        <div class="form-check ">
+                            <input id="@guid" class="form-check-input" type="checkbox" checked="">
+                            <label for="@guid" class="form-check-label text-decoration-line-through">
+                                @item
+                            </label>
+                        </div>
+                    </li>
+                }
+            }
+        </ul>
+	}
 </div>
-
-@code {
-	[Parameter]
-	public Todo Model { get; set; }
-
-	Timer Timer;
-	string PrettyTime;
-
-	private void Update(object _)
-	{
-		PrettyTime = DateTime.Now.ToString("HH:mm:ss");
-
-		InvokeAsync(() => StateHasChanged());
-	}
-
-	protected override async Task OnInitializedAsync()
-	{
-		await base.OnInitializedAsync();
-
-		Timer = new Timer(Update, new AutoResetEvent(false), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-	}
-
-	public void Dispose()
-	{
-		Timer?.Dispose();
-	}
-}

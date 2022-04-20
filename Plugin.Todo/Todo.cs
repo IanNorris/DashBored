@@ -5,6 +5,8 @@ namespace Plugin.Todo
 {
 	public class Todo : IPlugin
 	{
+		public const string TokenCache = "TokenCache";
+
 		public static Type DataType => typeof(TodoData);
 		public Type RazorType => typeof(TodoView);
 		public CardStyle CardStyle => new CardStyle
@@ -15,40 +17,124 @@ namespace Plugin.Todo
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
-			{ 0, 5 * 60 * 1000 }, //5m
+			//{ 0, 5 * 60 * 1000 }, //5m
+			{ 0, 10 * 1000 }, //10s
 		};
 
 		public IEnumerable<Secret> Secrets => new List<Secret>
 		{
-
+			new Secret
+			{
+				Name = TokenCache,
+				DisplayName = "Token Cache",
+				Description = "Token storage",
+				UserVisible = false,
+			},
+			new Secret
+			{
+				Name = "Account",
+				DisplayName = "Account Name",
+				Description = "MSA used for authentication",
+				UserVisible = false,
+			}
 		};
 
 		public string Error { get; set; }
 
+		public string Message { get; set; }
+
+		public List<string> TodoItems { get; set; } = new List<string>();
+
+		public string Title { get; set; }
+
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
 
-		public Todo(TodoData data)
+		public Todo(TodoData data, string title)
 		{
-			/*var webClient = GraphClientFactory.Create(new GraphAuthenticationProvider(data));
-			var graphClient = new GraphServiceClient(webClient);
-			graphClient.Me.Todo.Lists.Request().GetAsync().ContinueWith(data =>
-			{
-				foreach (var entry in data.Result)
-				{
-					Console.Out.Write(entry.DisplayName);
-				}
-			});
-			*/
+			_data = data;
+			Title = title;
 		}
+
+		private bool _isInitializing = false;
 
 		public Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
-			return Task.FromResult(true);
+			try
+			{
+				if(_isInitializing)
+				{
+					return Task.FromResult(true);
+				}
+
+				_isInitializing = true;
+
+				_httpClient = GraphClientFactory.Create(new GraphAuthenticationProvider(pluginSecrets, _data, async message =>
+				{
+					if (Message != message)
+					{
+						Message = message;
+
+						if (Message != null)
+						{
+							OnDataChanged?.Invoke();
+						}
+						else
+						{
+							await OnTimer(0);
+						}
+					}
+				}));
+
+				_ = OnTimer(0);
+
+				return Task.FromResult(true);
+			}
+			finally
+			{
+				_isInitializing = false;
+			}
 		}
 
-		public Task<bool> OnTimer(int _)
+		public async Task<bool> OnTimer(int _)
 		{
-			return Task.FromResult(true);
+			if(Message == null && Error == null && _httpClient != null)
+			{
+				var graphClient = new GraphServiceClient(_httpClient);
+				var requestData = await graphClient.Me.Todo.Lists.Request().GetAsync();
+
+				foreach (var entry in requestData)
+				{
+					if (string.Compare(entry.DisplayName, _data.ListName, true) == 0)
+					{
+						var listItems = await graphClient.Me.Todo.Lists[entry.Id].Request().GetAsync();
+
+						lock (TodoItems)
+						{
+							TodoItems.Clear();
+
+							foreach (var item in listItems.Tasks)
+							{
+								TodoItems.Add(item.Title);
+							}
+						}
+						break;
+					}
+				}
+
+				if (!_isInitializing)
+				{
+					OnDataChanged?.Invoke();
+				}
+
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
+
+		private HttpClient _httpClient;
+		private TodoData _data;
 	}
 }

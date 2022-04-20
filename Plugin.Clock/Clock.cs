@@ -43,7 +43,7 @@ namespace Plugin.Clock
 			return Task.FromResult(true);
 		}
 
-		public Clock(ClockData _)
+		public Clock(ClockData _, string title)
 		{
 
 		}

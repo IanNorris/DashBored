@@ -24,7 +24,8 @@ namespace Plugin.Weather
 			{
 				Name = ApiKeySecret, 
 				DisplayName = "Api Key",
-				Description = "A Tomorrow.io Api Key"
+				Description = "A Tomorrow.io Api Key",
+				UserVisible = true,
 			}
 		};
 
@@ -38,7 +39,7 @@ namespace Plugin.Weather
 
 		WeatherData _data;
 
-		public Weather(WeatherData data)
+		public Weather(WeatherData data, string title)
 		{
 			_data = data;
 		}
