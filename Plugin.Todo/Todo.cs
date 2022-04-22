@@ -17,8 +17,7 @@ namespace Plugin.Todo
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
-			//{ 0, 5 * 60 * 1000 }, //5m
-			{ 0, 30 * 1000 }, //10s
+			{ 0, 5 * 60 * 1000 }, //5m
 		};
 
 		public IEnumerable<Secret> Secrets => new List<Secret>
@@ -36,13 +35,6 @@ namespace Plugin.Todo
 				DisplayName = "Account Name",
 				Description = "MSA used for authentication",
 				UserVisible = false,
-			},
-			new Secret
-			{
-				Name = "ClientSecret",
-				DisplayName = "Client Secret",
-				Description = "Client secret from the azure portal",
-				UserVisible = true,
 			}
 		};
 
