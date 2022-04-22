@@ -14,5 +14,6 @@ namespace DashBored.Host.Models
 
 		public string Plugin { get; set; }
 		public JObject Data { get; set; }
+		public bool Enabled { get; set; } = true;
 	}
 }
