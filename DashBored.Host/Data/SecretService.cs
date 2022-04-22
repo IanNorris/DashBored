@@ -23,16 +23,19 @@ namespace DashBored.Host.Data
 
 		public void SetValue(string fullPath, string encryptedValue)
 		{
-			var exists = _secrets.ContainsKey(fullPath);
-			if (exists && encryptedValue == null)
+			lock (this)
 			{
-				_secrets.Remove(fullPath);
-				SaveSecrets();
-			}
-			else if (encryptedValue != null)
-			{
-				_secrets[fullPath] = encryptedValue;
-				SaveSecrets();
+				var exists = _secrets.ContainsKey(fullPath);
+				if (exists && encryptedValue == null)
+				{
+					_secrets.Remove(fullPath);
+					SaveSecrets();
+				}
+				else if (encryptedValue != null)
+				{
+					_secrets[fullPath] = encryptedValue;
+					SaveSecrets();
+				}
 			}
 		}
 
@@ -54,7 +57,7 @@ namespace DashBored.Host.Data
 			return secretsPath;
 		}
 
-		public void LoadSecrets()
+		private void LoadSecrets()
 		{
 			var secretsPath = GetPath();
 
@@ -66,10 +69,13 @@ namespace DashBored.Host.Data
 
 			var fileContent = File.ReadAllText(secretsPath);
 
-			_secrets = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileContent);
+			lock (this)
+			{
+				_secrets = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileContent);
+			}
 		}
 
-		public void SaveSecrets()
+		private void SaveSecrets()
 		{
 			var secretsPath = GetPath();
 
