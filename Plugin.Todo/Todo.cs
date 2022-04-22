@@ -18,7 +18,7 @@ namespace Plugin.Todo
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
 			//{ 0, 5 * 60 * 1000 }, //5m
-			{ 0, 10 * 1000 }, //10s
+			{ 0, 30 * 1000 }, //10s
 		};
 
 		public IEnumerable<Secret> Secrets => new List<Secret>
@@ -36,6 +36,13 @@ namespace Plugin.Todo
 				DisplayName = "Account Name",
 				Description = "MSA used for authentication",
 				UserVisible = false,
+			},
+			new Secret
+			{
+				Name = "ClientSecret",
+				DisplayName = "Client Secret",
+				Description = "Client secret from the azure portal",
+				UserVisible = true,
 			}
 		};
 
@@ -68,7 +75,7 @@ namespace Plugin.Todo
 
 				_isInitializing = true;
 
-				_httpClient = GraphClientFactory.Create(new GraphAuthenticationProvider(pluginSecrets, _data, async message =>
+				_httpClient = GraphClientFactory.Create(new GraphAuthenticationProviderPublic(pluginSecrets, _data, async message =>
 				{
 					if (Message != message)
 					{
@@ -102,17 +109,19 @@ namespace Plugin.Todo
 				var graphClient = new GraphServiceClient(_httpClient);
 				var requestData = await graphClient.Me.Todo.Lists.Request().GetAsync();
 
+				//var calendarData = await graphClient.Me.CalendarView.Request().GetAsync();
+
 				foreach (var entry in requestData)
 				{
 					if (string.Compare(entry.DisplayName, _data.ListName, true) == 0)
 					{
-						var listItems = await graphClient.Me.Todo.Lists[entry.Id].Request().GetAsync();
+						var listItems = await graphClient.Me.Todo.Lists[entry.Id].Tasks.Request().GetAsync();
 
 						lock (TodoItems)
 						{
 							TodoItems.Clear();
 
-							foreach (var item in listItems.Tasks)
+							foreach (var item in listItems)
 							{
 								TodoItems.Add(item.Title);
 							}

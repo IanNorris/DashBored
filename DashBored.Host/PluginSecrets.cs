@@ -27,12 +27,15 @@ namespace DashBored.Host
 			return null;
 		}
 
-		public void SetSecret(string name, string value)
+		public void SetSecret(string name, string value, bool reinitializePlugin)
 		{
 			var encryptedValue = value != null ? _dataProtector.Protect(value) : null;
 			_secretService.SetValue($"{_keyName}.{name}", encryptedValue);
 
-			_onUpdated?.Invoke(this);
+			if (reinitializePlugin)
+			{
+				_onUpdated?.Invoke(this);
+			}
 		}
 
 		private string _keyName;

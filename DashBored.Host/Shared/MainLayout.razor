@@ -158,7 +158,7 @@
 
 	public void SetSecret(string newValue)
 	{
-		SelectedInstance.PluginSecrets.SetSecret(SelectedSecret, newValue);
+		SelectedInstance.PluginSecrets.SetSecret(SelectedSecret, newValue, reinitializePlugin: true);
 
 		NewSecretValue = null;
 		IsEditing = false;
