@@ -24,15 +24,18 @@
 
 	async Task OnDataUpdate()
 	{
-		await JS.InvokeVoidAsync(
-			"insertCalendar",
-			new object[] { 
-				FullCalendar, 
+		if (Model.GraphError != DashBored.MicrosoftGraph.GraphError.NeedsLogin)
+		{
+			await JS.InvokeVoidAsync(
+				"insertCalendar",
+				new object[] {
+				FullCalendar,
 				Model.FullCalendarEvents,
 				DateTime.Now.ToString("yyyy-MM-dd"),
 				DateTime.Now.AddDays(7).ToString("yyyy-MM-dd")
-			}
-		);
+					}
+			);
+		}
 	}
 
 	void NonAsyncOnDataUpdate()
