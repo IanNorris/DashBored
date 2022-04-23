@@ -1,0 +1,22 @@
+.fc .fc-timegrid-axis-cushion
+{
+    max-width: 80px;
+}
+
+.fc-timegrid-event-harness-inset .fc-timegrid-event, .fc-timegrid-event.fc-event-mirror, .fc-timegrid-more-link
+{
+    border: none;
+    box-shadow: none;
+}
+
+.fc-event-title
+{
+    align-content: center !important;
+    height: 100%;
+    flex: auto;
+}
+
+.calendar-card
+{
+    padding: 0px;
+}

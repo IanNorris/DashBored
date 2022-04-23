@@ -1,0 +1,57 @@
+﻿@using Microsoft.JSInterop
+@using DashBored.PluginApi
+@inherits PluginComponent<Calendar>
+@implements IDisposable
+
+@inject IJSRuntime JS
+
+<div class="calendar flex-fill">
+	@if(Model.GraphError == DashBored.MicrosoftGraph.GraphError.NeedsLogin)
+	{
+		<div class="alert alert-warning error-message" role="alert">
+            <p>No account signed in.</p>
+			<button type="button" class="btn btn-primary btn-lg" @onclick="@(e => Model.Login())">Sign in</button>
+		</div>
+	}
+	else
+	{
+		<div @ref="@FullCalendar"></div>
+	}
+</div>
+
+@code{
+	ElementReference FullCalendar;
+
+	async Task OnDataUpdate()
+	{
+		await JS.InvokeVoidAsync(
+			"insertCalendar",
+			new object[] { 
+				FullCalendar, 
+				Model.FullCalendarEvents,
+				DateTime.Now.ToString("yyyy-MM-dd"),
+				DateTime.Now.AddDays(7).ToString("yyyy-MM-dd")
+			}
+		);
+	}
+
+	void NonAsyncOnDataUpdate()
+	{
+		OnDataUpdate().GetAwaiter().GetResult();
+	}
+
+	protected override void OnInitialized()
+	{
+		Model.OnDataChanged += NonAsyncOnDataUpdate;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		await OnDataUpdate();
+	}
+
+	public void Dispose()
+	{
+		Model.OnDataChanged -= NonAsyncOnDataUpdate;
+	}
+}

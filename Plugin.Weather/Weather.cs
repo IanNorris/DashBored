@@ -29,6 +29,9 @@ namespace Plugin.Weather
 			}
 		};
 
+		public IEnumerable<string> ScriptPaths => null;
+		public IEnumerable<string> StylesheetPaths => null;
+
 		public string Error { get; set; }
 
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }

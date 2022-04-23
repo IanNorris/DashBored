@@ -38,6 +38,52 @@ namespace DashBored.Host.Data
 
 		}
 
+		public List<string> Scripts
+		{
+			get
+			{
+				var set = new HashSet<string>();
+				foreach(var page in Pages)
+				{
+					foreach(var tile in page.Tiles)
+					{
+						if(tile.PluginInstance.ScriptPaths != null)
+						{
+							foreach(var script in tile.PluginInstance.ScriptPaths)
+							{
+								set.Add($"_content/{tile.PluginInstance.GetType().Namespace}/{script}");
+							}
+						}
+					}
+				}
+
+				return set.ToList();
+			}
+		}
+
+		public List<string> Stylesheets
+		{
+			get
+			{
+				var set = new HashSet<string>();
+				foreach (var page in Pages)
+				{
+					foreach (var tile in page.Tiles)
+					{
+						if (tile.PluginInstance.StylesheetPaths != null)
+						{
+							foreach (var stylesheet in tile.PluginInstance.StylesheetPaths)
+							{
+								set.Add($"_content/{tile.PluginInstance.GetType().Namespace}/{stylesheet}");
+							}
+						}
+					}
+				}
+
+				return set.ToList();
+			}
+		}
+
 		public void Dispose()
 		{
 			foreach(var page in Pages)

@@ -12,6 +12,8 @@ namespace Plugin.Clock
 		};
 
 		public IEnumerable<Secret> Secrets => null;
+		public IEnumerable<string> ScriptPaths => null;
+		public IEnumerable<string> StylesheetPaths => null;
 
 		public CardStyle CardStyle => new CardStyle
 		{

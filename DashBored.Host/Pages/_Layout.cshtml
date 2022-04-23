@@ -1,6 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
+@using DashBored.Host.Data
 @namespace DashBored.Host.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@inject PageService Pages
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,6 +18,12 @@
     <link rel="stylesheet" href="./nifty_v3/css/color-schemes/dark/bootstrap.css">
     <link rel="stylesheet" href="./nifty_v3/css/nifty.min.css">
     <link rel="stylesheet" href="./nifty_v3/css/color-schemes/dark/nifty.css">
+
+    @foreach(var stylesheet in Pages.Stylesheets)
+    {
+        <link rel="stylesheet" href="@stylesheet">
+    }
+
     <link rel="stylesheet" href="./css/main.css">
     <link href="DashBored.Host.styles.css" rel="stylesheet">
 
@@ -33,6 +42,12 @@
     </div>
     
     <script src="~/lib/bootstrap/js/bootstrap.js"></script>
+
+    @foreach(var script in Pages.Scripts)
+    {
+       <script src="@script"></script>
+    }
+
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

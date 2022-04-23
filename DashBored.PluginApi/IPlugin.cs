@@ -9,6 +9,8 @@ namespace DashBored.PluginApi
 		Type RazorType { get; }
 		public CardStyle CardStyle { get; }
 		public IEnumerable<Secret> Secrets { get; }
+		public IEnumerable<string> ScriptPaths { get; }
+		public IEnumerable<string> StylesheetPaths { get; }
 		public IDictionary<int, int> TimerFrequencies { get; }
 		public string Error { get; set; }
 

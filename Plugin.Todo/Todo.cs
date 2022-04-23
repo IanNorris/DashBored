@@ -5,13 +5,11 @@ namespace Plugin.Todo
 {
 	public class Todo : IPlugin
 	{
-		public const string TokenCache = "TokenCache";
-
 		public static Type DataType => typeof(TodoData);
 		public Type RazorType => typeof(TodoView);
 		public CardStyle CardStyle => new CardStyle
 		{
-			Classes = "todo",
+			Classes = "todo-card",
 			Padding = true,
 		};
 
@@ -21,6 +19,8 @@ namespace Plugin.Todo
 		};
 
 		public IEnumerable<Secret> Secrets => null;
+		public IEnumerable<string> ScriptPaths => null;
+		public IEnumerable<string> StylesheetPaths => null;
 
 		public string Error { get; set; }
 
