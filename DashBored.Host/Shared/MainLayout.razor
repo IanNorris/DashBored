@@ -97,29 +97,32 @@
 
 					if(selectedTile != null)
 					{
-						foreach(var secret in selectedTile.PluginInstance.Secrets)
+						if(selectedTile.PluginInstance.Secrets != null)
 						{
-							if(secret.UserVisible)
+							foreach(var secret in selectedTile.PluginInstance.Secrets)
 							{
-								var hasValue = selectedTile.PluginSecrets.GetSecret(secret.Name) != null;
-								var hasValueIcon = hasValue ? "✅" : "❌";
+								if(secret.UserVisible)
+								{
+									var hasValue = selectedTile.PluginSecrets.GetSecret(secret.Name) != null;
+									var hasValueIcon = hasValue ? "✅" : "❌";
 
-								<tr @onclick="@(e => ShowSetSecretModal(selectedTile, secret.Name))">
-									<td>@secret.DisplayName</td>
-									<td>@secret.Description</td>
-									<td>
-										@if(IsEditing)
-										{
-											<input class="form-control" @onchange="@( ev => SetSecret((string)ev.Value))" @onfocusout="@( () => IsEditing = false )" type="text" autofocus/>
-										}
-										else
-										{
-											<i>Hidden (click to edit)</i>
-										}
-									</td>
-									<td>@hasValueIcon</td>
-								</tr>
+									<tr @onclick="@(e => ShowSetSecretModal(selectedTile, secret.Name))">
+										<td>@secret.DisplayName</td>
+										<td>@secret.Description</td>
+										<td>
+											@if(IsEditing)
+											{
+												<input class="form-control" @onchange="@( ev => SetSecret((string)ev.Value))" @onfocusout="@( () => IsEditing = false )" type="text" autofocus/>
+											}
+											else
+											{
+												<i>Hidden (click to edit)</i>
+											}
+										</td>
+										<td>@hasValueIcon</td>
+									</tr>
 								}
+							}
 						}
 					}
 				}

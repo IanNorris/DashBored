@@ -11,10 +11,7 @@ namespace Plugin.Clock
 			{ 0, 1000 },
 		};
 
-		public IEnumerable<Secret> Secrets => new List<Secret>
-		{
-
-		};
+		public IEnumerable<Secret> Secrets => null;
 
 		public CardStyle CardStyle => new CardStyle
 		{

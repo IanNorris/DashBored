@@ -20,23 +20,7 @@ namespace Plugin.Todo
 			{ 0, 5 * 60 * 1000 }, //5m
 		};
 
-		public IEnumerable<Secret> Secrets => new List<Secret>
-		{
-			new Secret
-			{
-				Name = TokenCache,
-				DisplayName = "Token Cache",
-				Description = "Token storage",
-				UserVisible = false,
-			},
-			new Secret
-			{
-				Name = "Account",
-				DisplayName = "Account Name",
-				Description = "MSA used for authentication",
-				UserVisible = false,
-			}
-		};
+		public IEnumerable<Secret> Secrets => null;
 
 		public string Error { get; set; }
 
