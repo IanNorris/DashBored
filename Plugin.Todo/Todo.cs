@@ -1,5 +1,5 @@
-﻿using DashBored.PluginApi;
-using Microsoft.Graph;
+﻿using DashBored.MicrosoftGraph;
+using DashBored.PluginApi;
 
 namespace Plugin.Todo
 {
@@ -24,11 +24,11 @@ namespace Plugin.Todo
 
 		public string Error { get; set; }
 
-		public string Message { get; set; }
-
 		public List<string> TodoItems { get; set; } = new List<string>();
 
 		public string Title { get; set; }
+
+		public GraphError GraphError { get; set; }
 
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
 
@@ -38,88 +38,73 @@ namespace Plugin.Todo
 			Title = title;
 		}
 
-		private bool _isInitializing = false;
-
-		public Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
+		public async Task Login()
 		{
-			try
+			await _client.AcquireToken(true);
+
+			await OnTimer(0);
+		}
+
+		public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
+		{
+			_client = new GraphClient(pluginSecrets, _data.AzureAD, _scopes, (errorType, message) =>
 			{
-				if(_isInitializing)
-				{
-					return Task.FromResult(true);
-				}
+				GraphError = errorType;
+				Error = message;
 
-				_isInitializing = true;
+				OnDataChanged?.Invoke();
+			});
 
-				_httpClient = GraphClientFactory.Create(new GraphAuthenticationProviderPublic(pluginSecrets, _data, async message =>
-				{
-					if (Message != message)
-					{
-						Message = message;
+			await OnTimer(0);
 
-						if (Message != null)
-						{
-							OnDataChanged?.Invoke();
-						}
-						else
-						{
-							await OnTimer(0);
-						}
-					}
-				}));
-
-				_ = OnTimer(0);
-
-				return Task.FromResult(true);
-			}
-			finally
-			{
-				_isInitializing = false;
-			}
+			return true;
 		}
 
 		public async Task<bool> OnTimer(int _)
 		{
-			if(Message == null && Error == null && _httpClient != null)
+			//Don't retry on FatalError or NeedsAuth.
+			if(GraphError == GraphError.Success || GraphError == GraphError.Error)
 			{
-				var graphClient = new GraphServiceClient(_httpClient);
-				var requestData = await graphClient.Me.Todo.Lists.Request().GetAsync();
-
-				//var calendarData = await graphClient.Me.CalendarView.Request().GetAsync();
-
-				foreach (var entry in requestData)
+				try
 				{
-					if (string.Compare(entry.DisplayName, _data.ListName, true) == 0)
+					var requestData = await _client.Client.Me.Todo.Lists.Request().GetAsync();
+
+					foreach (var entry in requestData)
 					{
-						var listItems = await graphClient.Me.Todo.Lists[entry.Id].Tasks.Request().GetAsync();
-
-						lock (TodoItems)
+						if (string.Compare(entry.DisplayName, _data.ListName, true) == 0)
 						{
-							TodoItems.Clear();
+							var listItems = await _client.Client.Me.Todo.Lists[entry.Id].Tasks.Request().GetAsync();
 
-							foreach (var item in listItems)
+							lock (TodoItems)
 							{
-								TodoItems.Add(item.Title);
+								TodoItems.Clear();
+
+								foreach (var item in listItems)
+								{
+									TodoItems.Add(item.Title);
+								}
 							}
+
+							OnDataChanged?.Invoke();
+							break;
 						}
-						break;
 					}
 				}
-
-				if (!_isInitializing)
+				catch
 				{
-					OnDataChanged?.Invoke();
+					if(GraphError == GraphError.Success)
+					{
+						throw;
+					}
 				}
+			}
 
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return true;
 		}
 
-		private HttpClient _httpClient;
+		private GraphClient _client;
 		private TodoData _data;
+
+		private string[] _scopes = { "email", "profile", "offline_access", "User.Read", "Tasks.Read", "Tasks.Read.Shared", "Tasks.ReadWrite", "Tasks.ReadWrite.Shared" };
 	}
 }

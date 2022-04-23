@@ -1,10 +1,10 @@
-﻿
+﻿using DashBored.MicrosoftGraph.Models;
+
 namespace Plugin.Todo
 {
 	public class TodoData
 	{
-		public string ClientId { get; set; }
-		public string TenantId { get; set; }
+		public AzureAD AzureAD { get; set; }
 		public string ListName { get; set; }
 	}
 }

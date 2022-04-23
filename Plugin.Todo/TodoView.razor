@@ -2,16 +2,17 @@
 @inherits PluginComponent<Todo>
 
 <div class="todo">
-	@if(Model.Message != null)
+    <h4 class="mb-3">@Model.Title</h4>
+
+	@if(Model.GraphError == DashBored.MicrosoftGraph.GraphError.NeedsLogin)
 	{
 		<div class="alert alert-warning error-message" role="alert">
-			@Model.Message
+            <p>No account signed in.</p>
+			<button type="button" class="btn btn-primary btn-lg" @onclick="@(e => Model.Login())">Sign in</button>
 		</div>
 	}
 	else
 	{
-		<h4 class="mb-3">@Model.Title</h4>
-
 		<ul class="list-group list-group-borderless">
             @lock(Model.TodoItems)
             {
