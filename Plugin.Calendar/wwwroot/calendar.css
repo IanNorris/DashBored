@@ -1,22 +1,66 @@
 .fc .fc-timegrid-axis-cushion
 {
-    max-width: 80px;
+    min-width: 70px;
+    max-width: 100px;
+    text-align: right;
 }
 
 .fc-timegrid-event-harness-inset .fc-timegrid-event, .fc-timegrid-event.fc-event-mirror, .fc-timegrid-more-link
 {
-    border: none;
     box-shadow: none;
 }
 
 .fc-event-title
 {
     align-content: center !important;
-    height: 100%;
-    flex: auto;
 }
 
 .calendar-card
 {
     padding: 0px;
+}
+
+.fc-timegrid td, .fc-timegrid th, .fc-timegrid tr
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: dimgrey;
+}
+
+.fc-timegrid td,th
+{
+    border-left-style: solid;
+    border-right-style: solid;
+}
+
+.fc-timegrid td:first-child,
+.fc-timegrid th:first-child,
+.fc-timegrid td:nth-child(3),
+.fc-timegrid th:nth-child(3)
+{
+    border-left-style: none !important;
+}
+
+.fc-timegrid td:nth-child(2),
+.fc-timegrid th:nth-child(2)
+{
+    border-right-style: none !important;
+}
+
+.fc-timegrid td:last-child, 
+.fc-timegrid th:last-child
+{
+    border-right-style: none !important;
+}
+
+.fc-view-harness-active
+{
+    height: 100% !important;
+    position: absolute !important;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    flex-grow: 1;
+    position: relative;
 }

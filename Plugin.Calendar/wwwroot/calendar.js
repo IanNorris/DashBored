@@ -14,6 +14,8 @@
         nowIndicator: true,
         slotEventOverlap: false,
         displayEventTime: false,
+        eventMinHeight: 25,
+        expandRows: true,
 
         visibleRange: {
             start: startDateIn,
