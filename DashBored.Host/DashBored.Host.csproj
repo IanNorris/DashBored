@@ -24,6 +24,7 @@
     <ProjectReference Include="..\DashBored.PluginApi\DashBored.PluginApi.csproj" />
     <ProjectReference Include="..\Plugin.Calendar\Plugin.Calendar.csproj" />
     <ProjectReference Include="..\Plugin.Clock\Plugin.Clock.csproj" />
+    <ProjectReference Include="..\Plugin.Portfolio\Plugin.Portfolio.csproj" />
     <ProjectReference Include="..\Plugin.RTSP\Plugin.RTSP.csproj" />
     <ProjectReference Include="..\Plugin.Todo\Plugin.Todo.csproj" />
     <ProjectReference Include="..\Plugin.Weather\Plugin.Weather.csproj" />

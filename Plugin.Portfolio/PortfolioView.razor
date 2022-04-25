@@ -1,0 +1,31 @@
+﻿@using DashBored.PluginApi
+@inherits PluginComponent<Portfolio>
+
+
+<div class="calendar flex-fill">
+	@if(Model.Error != null)
+	{
+		<div class="alert alert-warning error-message" role="alert">
+            <p>@Model.Error</p>
+		</div>
+	}
+	else
+	{
+		<table>
+			<tr>
+				<td>Symbol</td>
+				<td>Change</td>
+				<td>Description</td>
+			</tr>
+		
+			@foreach(var stock in Model.GetStockData())
+			{
+				<tr>
+					<td>@stock.ShortName</td>
+					<td>@stock.ChangePercentage.Value.ToString("0.00")%</td>
+					<td>@stock.Description</td>
+				</tr>
+			}
+		</table>
+	}
+</div>
