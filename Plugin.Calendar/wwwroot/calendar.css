@@ -1,3 +1,8 @@
+:root
+{
+    --fc-today-bg-color: #444F59;
+}
+
 .fc .fc-timegrid-axis-cushion
 {
     min-width: 70px;
@@ -63,11 +68,6 @@
     top: 0;
     flex-grow: 1;
     position: relative;
-}
-
-.fc-event-title
-{
-    font-weight: 500;
 }
 
 .calendar-event-blue
