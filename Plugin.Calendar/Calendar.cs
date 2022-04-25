@@ -17,7 +17,7 @@ namespace Plugin.Calendar
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
-			{ 0, 5 * 60 * 1000 }, //5m
+			{ 0, 15 * 60 * 1000 }, //15m
 		};
 
 		public IEnumerable<Secret> Secrets => null;
@@ -98,8 +98,18 @@ namespace Plugin.Calendar
 					int colourIndex = 0;
 					foreach (var calendar in orderedCalendars)
 					{
-						var colour = _colours[(colourIndex++) % _colours.Length];
-						newCalendarNames.Add(calendar.Name, colour);
+						string color = null;
+						if(_data.Calendars.TryGetValue(calendar.Name, out var calendarSettings))
+						{
+							color = calendarSettings.Color;
+						}
+						
+						if(color == null)
+						{
+							color = _colours[(colourIndex++) % _colours.Length];
+						}
+
+						newCalendarNames.Add(calendar.Name, color);
 
 						var calendarData = await _client.Client.Me.Calendars[calendar.Id].CalendarView.Request(queryRange).GetAsync();
 						var calendarEvents = calendarData;
@@ -113,13 +123,22 @@ namespace Plugin.Calendar
 									var newEvent = new CalendarEvent
 									{
 										Title = e.Subject,
-										Color = colour,
+										Color = color,
 										StartTime = DateTime.Parse(e.Start.DateTime),
 										EndTime = DateTime.Parse(e.End.DateTime),
 										AllDay = e.IsAllDay.GetValueOrDefault(),
 									};
 
-									newCalendarEvents.Add(newEvent);
+									var existing = newCalendarEvents.FirstOrDefault(c =>
+										  c.StartTime == newEvent.StartTime
+									   && c.EndTime == newEvent.EndTime
+									   && c.Title == newEvent.Title
+									   && c.AllDay == newEvent.AllDay);
+
+									if (existing == null)
+									{
+										newCalendarEvents.Add(newEvent);
+									}
 
 									return true;
 								}
@@ -182,7 +201,7 @@ namespace Plugin.Calendar
 		private GraphClient _client;
 		private CalendarData _data;
 
-		private string[] _colours = { "red", "blue", "green", "purple", "orange", "cyan" };
+		private string[] _colours = { "blue", "green", "red", "linen", "dgreen" };
 
 		private string[] _scopes = { "email", "profile", "offline_access", "User.Read", "Calendars.Read", "Calendars.Read.Shared" };
 	}

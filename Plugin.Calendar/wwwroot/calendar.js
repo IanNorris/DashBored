@@ -1,8 +1,8 @@
 ﻿function insertCalendar(elementRef, newEvents, startDateIn, endDateIn) {
     const calendar = new FullCalendar.Calendar(elementRef, {
         editable: false,
-        droppable: false, // this allows things to be dropped onto the calendar
-        dayMaxEvents: false, // allow "more" link when too many events
+        droppable: false,
+        dayMaxEvents: false,
         headerToolbar: {
             left: "",
             center: "",

@@ -64,3 +64,48 @@
     flex-grow: 1;
     position: relative;
 }
+
+.fc-event-title
+{
+    font-weight: 500;
+}
+
+.calendar-event-blue
+{
+    background-color: #7bb0ff;
+}
+
+.calendar-event-blue .fc-event-title
+{
+    color: black;
+}
+
+.calendar-event-red
+{
+    background-color: #B73C3F;
+}
+
+.calendar-event-green
+{
+    background-color: #6C9E90;
+}
+
+.calendar-event-green .fc-event-title
+{
+    color: black;
+}
+
+.calendar-event-dgreen
+{
+    background-color: #1D525C;
+}
+
+.calendar-event-linen
+{
+    background-color: #F1EAB3;
+}
+
+.calendar-event-linen .fc-event-title
+{
+    color: black;
+}
