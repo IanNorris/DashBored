@@ -17,13 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Todo", "Plugin.Todo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Weather", "Plugin.Weather\Plugin.Weather.csproj", "{BF6F9633-C1A5-4F3D-A24D-49E804A9B93C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashBored.MicrosoftGraph", "DashBored.MicrosoftGraph\DashBored.MicrosoftGraph.csproj", "{C0749F5B-3339-4C32-ADFB-C09D7A882ECC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DashBored.MicrosoftGraph", "DashBored.MicrosoftGraph\DashBored.MicrosoftGraph.csproj", "{C0749F5B-3339-4C32-ADFB-C09D7A882ECC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Calendar", "Plugin.Calendar\Plugin.Calendar.csproj", "{75211526-A3CB-4547-9FC6-BA389A32B468}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Portfolio", "Plugin.Portfolio\Plugin.Portfolio.csproj", "{7963E072-1261-4EBB-A1E0-1D2E4C69932B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashBored.TradingView", "DashBored.TradingView\DashBored.TradingView.csproj", "{269E3F21-C19D-4E29-8FBC-32AAC5E02FE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DashBored.TradingView", "DashBored.TradingView\DashBored.TradingView.csproj", "{269E3F21-C19D-4E29-8FBC-32AAC5E02FE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

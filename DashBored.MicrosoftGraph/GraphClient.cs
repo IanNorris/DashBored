@@ -7,11 +7,16 @@ namespace DashBored.MicrosoftGraph
 {
 	public class GraphClient
 	{
-		public GraphClient(IPluginSecrets pluginSecrets, AzureAD azureAD, string[] scopes, GraphAuthenticationProviderPublic.OnAuthErrorDelegate onAuthenticationError)
+		public GraphClient(
+			IPluginSecrets pluginSecrets, 
+			AzureAD azureAD, 
+			string[] scopes, 
+			GraphAuthenticationProviderPublic.OnAuthErrorDelegate onAuthenticationError,
+			GraphAuthenticationProviderPublic.OnLoginPromptDelegate onLoginPrompt)
 		{
 			_onAuthenticationError = onAuthenticationError;
 
-			_authProvider = new GraphAuthenticationProviderPublic(pluginSecrets, azureAD, scopes, _onAuthenticationError);
+			_authProvider = new GraphAuthenticationProviderPublic(pluginSecrets, azureAD, scopes, _onAuthenticationError, onLoginPrompt);
 
 			_httpClient = GraphClientFactory.Create(_authProvider);
 			_client = new GraphServiceClient(_httpClient);

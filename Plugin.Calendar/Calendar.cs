@@ -47,6 +47,8 @@ namespace Plugin.Calendar
 
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
 
+		public GraphAuthenticationProviderPublic.OnLoginPromptDelegate OnLoginPrompt { get; set; }
+
 		public Calendar(CalendarData data, string title)
 		{
 			_data = data;
@@ -68,6 +70,10 @@ namespace Plugin.Calendar
 				Error = message;
 
 				OnDataChanged?.Invoke();
+			},
+			async (targetUri, redirectUri, cancellationToken) =>
+			{
+				return await OnLoginPrompt(targetUri, redirectUri, cancellationToken);
 			});
 
 			await OnTimer(0);

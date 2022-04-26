@@ -33,3 +33,17 @@
         </ul>
 	}
 </div>
+
+@code{
+    async Task<Uri> OnLoginPrompt(Uri targetUri, Uri redirectUri, CancellationToken cancellationToken)
+    {
+        await OpenBrowserPopup(targetUri);
+
+        return await AuthService.CreateNewReceiptTask();
+    }
+
+	protected override void OnInitialized()
+	{
+		(Model as Todo).OnLoginPrompt += OnLoginPrompt;
+	}
+}

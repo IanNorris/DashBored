@@ -38,6 +38,13 @@
 		}
 	}
 
+	async Task<Uri> OnLoginPrompt(Uri targetUri, Uri redirectUri, CancellationToken cancellationToken)
+	{
+		await OpenBrowserPopup(targetUri);
+
+		return await AuthService.CreateNewReceiptTask();
+	}
+
 	void NonAsyncOnDataUpdate()
 	{
 		OnDataUpdate().GetAwaiter().GetResult();
@@ -46,6 +53,7 @@
 	protected override void OnInitialized()
 	{
 		Model.OnDataChanged += NonAsyncOnDataUpdate;
+		(Model as Calendar).OnLoginPrompt += OnLoginPrompt;
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)

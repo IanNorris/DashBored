@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace DashBored.PluginApi
 {
@@ -7,6 +8,16 @@ namespace DashBored.PluginApi
 		[Parameter]
 		public T Model { get; set; }
 
+		[Inject]
+		IJSRuntime JSRuntime { get; set; }
+
+		[Inject]
+		public IAuthService AuthService { get; set; }
+
+		public async Task OpenBrowserPopup(Uri targetUri)
+		{
+			await JSRuntime.InvokeVoidAsync("openWindow", targetUri.ToString());
+		}
 
 		protected override void OnParametersSet()
 		{
@@ -17,6 +28,6 @@ namespace DashBored.PluginApi
 					InvokeAsync(StateHasChanged);
 				};
 			}
-	}
+		}
 	}
 }

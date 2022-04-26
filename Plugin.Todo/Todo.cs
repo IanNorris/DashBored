@@ -15,7 +15,7 @@ namespace Plugin.Todo
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
-			{ 0, 5 * 60 * 1000 }, //5m
+			{ 0, 15 * 60 * 1000 }, //15m
 		};
 
 		public IEnumerable<Secret> Secrets => null;
@@ -31,6 +31,8 @@ namespace Plugin.Todo
 		public GraphError GraphError { get; set; }
 
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
+
+		public GraphAuthenticationProviderPublic.OnLoginPromptDelegate OnLoginPrompt { get; set; }
 
 		public Todo(TodoData data, string title)
 		{
@@ -53,6 +55,10 @@ namespace Plugin.Todo
 				Error = message;
 
 				OnDataChanged?.Invoke();
+			},
+			async (targetUri, redirectUri, cancellationToken) =>
+			{
+				return await OnLoginPrompt(targetUri, redirectUri, cancellationToken);
 			});
 
 			await OnTimer(0);

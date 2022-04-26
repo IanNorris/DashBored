@@ -1,5 +1,6 @@
 using DashBored.Host;
 using DashBored.Host.Data;
+using DashBored.PluginApi;
 
 var pluginLoader = new PluginLoader();
 
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddDataProtection();
+builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<PluginLoader>();
 builder.Services.AddSingleton<SecretService>();
 builder.Services.AddSingleton<PageService>();

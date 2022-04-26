@@ -2,24 +2,27 @@
 using DashBored.PluginApi;
 using Microsoft.Graph;
 using DashBored.MicrosoftGraph.Models;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace DashBored.MicrosoftGraph
 {
 	public class GraphAuthenticationProviderPublic : IAuthenticationProvider
 	{
 		public delegate void OnAuthErrorDelegate(GraphError errorType, string message);
+		public delegate Task<Uri> OnLoginPromptDelegate(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
 
-		public GraphAuthenticationProviderPublic(IPluginSecrets secrets, AzureAD azureAD, string[] scopes, OnAuthErrorDelegate onAuthError)
+		public GraphAuthenticationProviderPublic(IPluginSecrets secrets, AzureAD azureAD, string[] scopes, OnAuthErrorDelegate onAuthError, OnLoginPromptDelegate onLoginPrompt)
 		{
 			_clientId = azureAD.ClientId;
 			_tenantId = azureAD.TenantId;
 			_onAuthError = onAuthError;
+			_customWebUi = new BlazorWebUI(onLoginPrompt);
 			_scopes = scopes;
 			_secrets = secrets;
 
 			_clientApplication = PublicClientApplicationBuilder.Create(_clientId)
 			   .WithClientId(_clientId)
-			   .WithRedirectUri("http://localhost/")
+			   .WithRedirectUri("https://localhost:7058/AuthRedirect")
 			   .WithTenantId(_tenantId)
 			   .Build();
 
@@ -82,7 +85,9 @@ namespace DashBored.MicrosoftGraph
 			{
 				try
 				{
-					var result = await _clientApplication.AcquireTokenInteractive(_scopes).ExecuteAsync();
+					var result = await _clientApplication.AcquireTokenInteractive(_scopes)
+						.WithCustomWebUi(_customWebUi)
+						.ExecuteAsync();
 
 					_authorizationHeader = result.CreateAuthorizationHeader();
 
@@ -129,6 +134,7 @@ namespace DashBored.MicrosoftGraph
 
 		private IPluginSecrets _secrets;
 		private OnAuthErrorDelegate _onAuthError;
+		private ICustomWebUi _customWebUi;
 		public IPublicClientApplication _clientApplication;
 	}
 }
