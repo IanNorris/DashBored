@@ -1,5 +1,6 @@
 ﻿using DashBored.MicrosoftGraph;
 using DashBored.PluginApi;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace Plugin.Todo
 {
@@ -30,12 +31,15 @@ namespace Plugin.Todo
 
 		public GraphError GraphError { get; set; }
 
+		private IServer _server;
+
 		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
 
 		public GraphAuthenticationProviderPublic.OnLoginPromptDelegate OnLoginPrompt { get; set; }
 
-		public Todo(TodoData data, string title)
+		public Todo(IServer server, TodoData data, string title)
 		{
+			_server = server;
 			_data = data;
 			Title = title;
 		}
@@ -49,7 +53,8 @@ namespace Plugin.Todo
 
 		public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
-			_client = new GraphClient(pluginSecrets, _data.AzureAD, _scopes, (errorType, message) =>
+			_client = new GraphClient(pluginSecrets, _data.AzureAD, _scopes, _server, 
+			(errorType, message) =>
 			{
 				GraphError = errorType;
 				Error = message;

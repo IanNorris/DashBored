@@ -7,6 +7,8 @@
 
 <PageTitle>Home</PageTitle>
 
+@if(Pages.Pages != null)
+{
 <div class="dashboard-container">
 	@foreach(var page in Pages.Pages)
 	{
@@ -24,7 +26,7 @@
 				{
 					<div class="alert alert-danger error-message" role="alert">
 						⚠️ @tile.PluginInstance.Error
-                    </div>
+					</div>
 				}
 				else
 				{
@@ -52,9 +54,9 @@
         <div class="row">
 			<div class="col-md-3">
 				<ul class="list-group">
-					@foreach(var page in Pages.Pages)
+					@foreach (var page in Pages.Pages)
 					{
-						foreach(var tile in page.Tiles)
+						foreach (var tile in page.Tiles)
 						{
 							var activeClass = tile.Id == SelectedTile ? "active" : "";
 							var errorIcon = tile.PluginInstance.Error != null ? "⚠️" : "";
@@ -68,7 +70,7 @@
 							</a>
 						}
 					}
-                </ul>
+				</ul>
 			</div>
 
 			<div class="col-md-9">
@@ -136,6 +138,7 @@
     </div>
   </div>
 </div>
+}
 
 @code
 {

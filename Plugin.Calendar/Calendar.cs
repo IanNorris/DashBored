@@ -1,5 +1,6 @@
 ﻿using DashBored.MicrosoftGraph;
 using DashBored.PluginApi;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Graph;
 using Plugin.Calendar.Models;
 
@@ -49,8 +50,11 @@ namespace Plugin.Calendar
 
 		public GraphAuthenticationProviderPublic.OnLoginPromptDelegate OnLoginPrompt { get; set; }
 
-		public Calendar(CalendarData data, string title)
+		private IServer _server;
+
+		public Calendar(IServer server, CalendarData data, string title)
 		{
+			_server = server;
 			_data = data;
 			Title = title;
 		}
@@ -64,7 +68,7 @@ namespace Plugin.Calendar
 
 		public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
-			_client = new GraphClient(pluginSecrets, _data.AzureAD, _scopes, (errorType, message) =>
+			_client = new GraphClient(pluginSecrets, _data.AzureAD, _scopes, _server, (errorType, message) =>
 			{
 				GraphError = errorType;
 				Error = message;

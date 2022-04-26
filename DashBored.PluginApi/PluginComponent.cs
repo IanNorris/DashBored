@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.JSInterop;
 
 namespace DashBored.PluginApi
@@ -13,6 +14,9 @@ namespace DashBored.PluginApi
 
 		[Inject]
 		public IAuthService AuthService { get; set; }
+
+		[Inject]
+		public IServer Server { get; set; }
 
 		public async Task OpenBrowserPopup(Uri targetUri)
 		{

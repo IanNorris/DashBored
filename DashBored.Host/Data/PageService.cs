@@ -1,4 +1,5 @@
 ﻿using DashBored.Host.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace DashBored.Host.Data
@@ -11,7 +12,7 @@ namespace DashBored.Host.Data
 			_secretService = secretService;
 		}
 
-		public async Task LoadPages()
+		public async Task LoadPages(IServiceProvider serviceProvider)
 		{
 			var folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DashBored");
 			var configPath = Path.Combine(folderPath, "Layout.json");
@@ -27,7 +28,7 @@ namespace DashBored.Host.Data
 
 			var layout = JsonConvert.DeserializeObject<Layout>(fileContent);
 
-			var page = new Page(layout, _pluginLoader);
+			var page = new Page(layout, _pluginLoader, serviceProvider);
 
 			await page.Initialize(_secretService);
 

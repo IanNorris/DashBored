@@ -24,16 +24,14 @@ namespace DashBored.Host
 			}
 		}
 
-		public IPlugin CreateInstance(string typeName, JObject pluginData, string title)
+		public IPlugin CreateInstance(IServiceProvider serviceProvider, string typeName, JObject pluginData, string title)
 		{
-			var pluginContext = new PluginContext();
-
 			if (_pluginTypes.TryGetValue(typeName, out var pluginType))
 			{
 				var dataType = pluginType.GetProperty("DataType", BindingFlags.Static | BindingFlags.Public);
 				var pluginDataType = (Type)dataType.GetValue(null);
 
-				return (IPlugin)CreateInstanceWithDependencyInjection(pluginType, pluginContext, pluginDataType, pluginData, title);
+				return (IPlugin)CreateInstanceWithDependencyInjection(serviceProvider, pluginType, pluginDataType, pluginData, title);
 			}
 			else
 			{
@@ -41,7 +39,7 @@ namespace DashBored.Host
 			}
 		}
 
-		private object CreateInstanceWithDependencyInjection(Type type, PluginContext pluginContext, Type dataType, JObject pluginData, string title)
+		private object CreateInstanceWithDependencyInjection(IServiceProvider serviceProvider, Type type, Type dataType, JObject pluginData, string title)
 		{
 			var constructors = type.GetConstructors();
 			foreach (var constructor in constructors.OrderByDescending(c => c.GetParameters().Length))
@@ -53,15 +51,6 @@ namespace DashBored.Host
 				object[] parametersOut = new object[parameters.Length];
 				foreach (var parameter in parameters)
 				{
-					foreach (var property in pluginContext.GetType().GetProperties())
-					{
-						if (parameter.ParameterType == property.PropertyType)
-						{
-							parametersOut[parameterIndex] = property.GetValue(pluginContext);
-							break;
-						}
-					}
-
 					if(parameter.ParameterType == dataType)
 					{
 						var convertedPluginData = pluginData.ToObject(dataType);
@@ -72,6 +61,12 @@ namespace DashBored.Host
 					if(parameter.ParameterType == typeof(string))
 					{
 						parametersOut[parameterIndex] = title ?? "";
+					}
+
+					if (parametersOut[parameterIndex] == null)
+					{
+						object resultingObject = serviceProvider.GetType().GetMethod("GetService").Invoke(serviceProvider, new object[] { parameter.ParameterType });
+						parametersOut[parameterIndex] = resultingObject;
 					}
 
 					if (parametersOut[parameterIndex] == null)
@@ -94,8 +89,6 @@ namespace DashBored.Host
 
 		private void LoadPluginsForAssembly(Assembly assembly)
 		{
-			var pluginContext = new PluginContext();
-
 			var assemblyTypes = assembly.GetTypes();
 
 			var types = assemblyTypes.Where(t => t.IsAssignableTo(typeof(IPlugin)));

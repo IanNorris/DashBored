@@ -2,6 +2,7 @@
 using DashBored.PluginApi;
 using Microsoft.Graph;
 using DashBored.MicrosoftGraph.Models;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace DashBored.MicrosoftGraph
 {
@@ -11,12 +12,13 @@ namespace DashBored.MicrosoftGraph
 			IPluginSecrets pluginSecrets, 
 			AzureAD azureAD, 
 			string[] scopes, 
+			IServer server,
 			GraphAuthenticationProviderPublic.OnAuthErrorDelegate onAuthenticationError,
 			GraphAuthenticationProviderPublic.OnLoginPromptDelegate onLoginPrompt)
 		{
 			_onAuthenticationError = onAuthenticationError;
 
-			_authProvider = new GraphAuthenticationProviderPublic(pluginSecrets, azureAD, scopes, _onAuthenticationError, onLoginPrompt);
+			_authProvider = new GraphAuthenticationProviderPublic(pluginSecrets, azureAD, scopes, server, _onAuthenticationError, onLoginPrompt);
 
 			_httpClient = GraphClientFactory.Create(_authProvider);
 			_client = new GraphServiceClient(_httpClient);

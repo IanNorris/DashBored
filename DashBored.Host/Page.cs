@@ -7,7 +7,7 @@ namespace DashBored.Host
 	{
 		public const int Dimension = 12;
 
-		public Page(Layout layout, PluginLoader loader)
+		public Page(Layout layout, PluginLoader loader, IServiceProvider serviceProvider)
 		{
 			var tileList = new List<TileInstance>();
 
@@ -18,7 +18,7 @@ namespace DashBored.Host
 					continue;
 				}
 
-				var pluginInstance = loader.CreateInstance(tile.Plugin, tile.Data, tile.Title);
+				var pluginInstance = loader.CreateInstance(serviceProvider, tile.Plugin, tile.Data, tile.Title);
 				var razorType = pluginInstance.RazorType;
 				var cardStyle = pluginInstance.CardStyle;
 

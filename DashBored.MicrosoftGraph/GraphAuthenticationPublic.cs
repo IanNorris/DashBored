@@ -3,6 +3,8 @@ using DashBored.PluginApi;
 using Microsoft.Graph;
 using DashBored.MicrosoftGraph.Models;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 namespace DashBored.MicrosoftGraph
 {
@@ -11,7 +13,7 @@ namespace DashBored.MicrosoftGraph
 		public delegate void OnAuthErrorDelegate(GraphError errorType, string message);
 		public delegate Task<Uri> OnLoginPromptDelegate(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
 
-		public GraphAuthenticationProviderPublic(IPluginSecrets secrets, AzureAD azureAD, string[] scopes, OnAuthErrorDelegate onAuthError, OnLoginPromptDelegate onLoginPrompt)
+		public GraphAuthenticationProviderPublic(IPluginSecrets secrets, AzureAD azureAD, string[] scopes, IServer server, OnAuthErrorDelegate onAuthError, OnLoginPromptDelegate onLoginPrompt)
 		{
 			_clientId = azureAD.ClientId;
 			_tenantId = azureAD.TenantId;
@@ -20,9 +22,21 @@ namespace DashBored.MicrosoftGraph
 			_scopes = scopes;
 			_secrets = secrets;
 
+			var listenAddress = server.Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault(a => a.StartsWith("https://"));
+
+			if(listenAddress == null)
+			{
+				server.Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault(a => a.StartsWith("http://"));
+			}
+
+			if(!listenAddress.EndsWith('/'))
+			{
+				listenAddress += "/";
+			}
+
 			_clientApplication = PublicClientApplicationBuilder.Create(_clientId)
 			   .WithClientId(_clientId)
-			   .WithRedirectUri("https://localhost:7058/AuthRedirect")
+			   .WithRedirectUri($"{listenAddress}AuthRedirect")
 			   .WithTenantId(_tenantId)
 			   .Build();
 
