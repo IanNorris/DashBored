@@ -93,7 +93,7 @@ namespace DashBored.Host.Data
 			}
 		}
 
-		public List<Page> Pages { get; private set; }
+		public List<Page> Pages { get; private set; } = new List<Page>();
 
 		private PluginLoader _pluginLoader;
 		private SecretService _secretService;
