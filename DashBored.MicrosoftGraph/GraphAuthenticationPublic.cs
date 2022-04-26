@@ -26,7 +26,7 @@ namespace DashBored.MicrosoftGraph
 
 			if(listenAddress == null)
 			{
-				server.Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault(a => a.StartsWith("http://"));
+				listenAddress = server.Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault(a => a.StartsWith("http://"));
 			}
 
 			if(!listenAddress.EndsWith('/'))
