@@ -17,6 +17,7 @@ namespace DashBored.TradingView.Models
 			Price = UpdateIf(Price, newData.Price);
 			ChangePercentage = UpdateIf(ChangePercentage, newData.ChangePercentage);
 			Change = UpdateIf(Change, newData.Change);
+			LogoId = UpdateIf(LogoId, newData.LogoId);
 		}
 
 		public QuoteData Clone()
@@ -28,6 +29,7 @@ namespace DashBored.TradingView.Models
 				ChangePercentage = ChangePercentage,
 				Description = Description,
 				Price = Price,
+				LogoId = LogoId,
 			};
 		}
 
@@ -36,6 +38,8 @@ namespace DashBored.TradingView.Models
 
 		[JsonProperty(PropertyName = "description")]
 		public string Description { get; set; } = null;
+		[JsonProperty(PropertyName = "logoid")]
+		public string LogoId { get; set; } = null;
 
 		[JsonProperty(PropertyName = "lp")]
 		public decimal? Price { get; set; } = null;

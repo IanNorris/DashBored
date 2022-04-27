@@ -11,7 +11,7 @@ namespace Plugin.Portfolio
 		public CardStyle CardStyle => new CardStyle
 		{
 			Classes = "portfolio-card",
-			Padding = false,
+			Padding = true,
 		};
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
@@ -55,7 +55,7 @@ namespace Plugin.Portfolio
 				}
 
 				OnDataChanged?.Invoke();
-			}, new string[] { "lp", "ch", "chp", "description", "status", "short_name" });
+			}, new string[] { "lp", "ch", "chp", "description", "status", "short_name", "logoid" });
 
 			if (_data.Stocks != null)
 			{

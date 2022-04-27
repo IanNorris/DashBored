@@ -11,19 +11,35 @@
 	}
 	else
 	{
-		<table>
-			<tr>
-				<td>Symbol</td>
-				<td>Change</td>
-				<td>Description</td>
-			</tr>
-		
+		<table class="table table-striped tabulator">	
 			@foreach(var stock in Model.GetStockData())
 			{
 				<tr>
+					<td>
+						@if(!string.IsNullOrWhiteSpace(stock.LogoId))
+						{
+							var logoPath = $"https://s3-symbol-logo.tradingview.com/{stock.LogoId}.svg";
+							<img class="rounded-circle" src="@logoPath"/>
+						}
+					</td>
 					<td>@stock.ShortName</td>
-					<td>@stock.ChangePercentage.Value.ToString("0.00")%</td>
-					<td>@stock.Description</td>
+					<td>
+						@if(stock.ChangePercentage.HasValue)
+						{
+							if(stock.ChangePercentage.Value >= 0)
+							{
+								<span class="change-pos">@stock.ChangePercentage.Value.ToString("0.00")%</span>
+							}
+							else
+							{
+								<span class="change-neg">@Math.Abs(stock.ChangePercentage.Value).ToString("0.00")%</span>
+							}
+						}
+						else
+						{
+							<span class="change-pos">-</span>
+						}
+					</td>
 				</tr>
 			}
 		</table>

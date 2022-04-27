@@ -1,80 +1,27 @@
-.weather
+.portfolio-card table
 {
-	display: block;
-	justify-content: center;
-	align-items: center;
-	margin: auto;
+	margin-left: auto !important;
+	margin-right: auto !important;
+	font-size: 1.5rem;
 }
 
-.weather-bigfont
+.portfolio-card table td
 {
-	font-size: 2em;
-}
-
-.weather-row
-{
-	display: flex;
-	width: 100%;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.weather-col-4
-{
-	padding: 4px;
-	width: 33.33%;
-	height: 100%;
-	margin: auto;
-	flex: 0 0 auto;
 	text-align: center;
 }
 
-.weather-col-6
+.portfolio-card table td img
 {
-	padding: 4px;
-	width: 50%;
-	height: 100%;
-	margin: auto;
-	flex: 0 0 auto;
-	text-align: center;
+	height: 2em;
+	padding: 0.25rem;
 }
 
-.weather-col-12
+.change-pos
 {
-	padding: 4px;
-	width: 100%;
-	height: 100%;
-	margin: auto;
-	flex: 0 0 auto;
-	text-align: center;
+	color: lawngreen;
 }
 
-.weather table
+.change-neg
 {
-	margin-top: 2em;
-	font-size: 1.25em;
-	margin: auto;
-	border-spacing: 0.5em;
-}
-
-.weather table tr td, .weather table tr th
-{
-	padding-left: 0.75em;
-	padding-right: 0.75em;
-	padding-top: 0.25em;
-}
-
-.weather table tr td.key
-{
-	text-align: right;
-}
-
-.weather table tr td.value, .weather table tr th.value
-{
-	text-align: left;
-}
-
-.weather-feels-like
-{
-	line-height: 0px;
+	color: mediumvioletred;
 }
