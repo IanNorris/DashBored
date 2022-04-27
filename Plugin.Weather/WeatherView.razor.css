@@ -64,9 +64,9 @@
 
 .weather table tr td, .weather table tr th
 {
-	padding-left: 0.75em;
-	padding-right: 0.75em;
-	padding-top: 0.25em;
+	padding-left: 0.75rem;
+	padding-right: 0.75rem;
+	padding-top: 0.25rem;
 }
 
 .weather table tr td.key
@@ -82,4 +82,9 @@
 .weather-feels-like
 {
 	line-height: 0px;
+}
+
+.weather-icon
+{
+	height: 4rem;
 }

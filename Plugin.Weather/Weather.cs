@@ -15,7 +15,7 @@ namespace Plugin.Weather
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
-			{ 0, 30 * 60 * 1000 }, //30 mins
+			{ 0, (int)TimeSpan.FromHours(2.0).TotalMilliseconds }, //2 hours
 		};
 
 		public IEnumerable<Secret> Secrets => new List<Secret>
