@@ -34,6 +34,8 @@ namespace DashBored.MicrosoftGraph
 				listenAddress += "/";
 			}
 
+			listenAddress = listenAddress.Replace("[::]", "localhost");
+
 			_clientApplication = PublicClientApplicationBuilder.Create(_clientId)
 			   .WithClientId(_clientId)
 			   .WithRedirectUri($"{listenAddress}AuthRedirect")
