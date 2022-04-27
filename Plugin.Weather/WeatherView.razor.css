@@ -6,6 +6,11 @@
 	margin: auto;
 }
 
+.weather-card
+{
+	font-size: 0.5rem;
+}
+
 .weather-bigfont
 {
 	font-size: 2em;

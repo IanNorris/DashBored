@@ -9,7 +9,7 @@ namespace Plugin.Weather
 		public Type RazorType => typeof(WeatherView);
 		public CardStyle CardStyle => new CardStyle
 		{
-			Classes = "weather",
+			Classes = "weather-card",
 			Padding = false,
 		};
 
