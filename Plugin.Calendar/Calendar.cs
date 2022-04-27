@@ -130,6 +130,16 @@ namespace Plugin.Calendar
 								_client.Client, calendarEvents,
 								e =>
 								{
+									if(e.IsCancelled.GetValueOrDefault() || e.IsDraft.GetValueOrDefault())
+									{
+										return true;
+									}
+
+									if (e.ResponseStatus.Response == ResponseType.Declined)
+									{
+										return true;
+									}
+
 									var newEvent = new CalendarEvent
 									{
 										Title = e.Subject,
