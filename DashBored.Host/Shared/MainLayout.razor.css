@@ -31,3 +31,8 @@ body
 {
     display: block;
 }
+
+.content__wrap
+{
+    padding-inline: 0.5rem !important;
+}
