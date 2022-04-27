@@ -92,7 +92,10 @@ namespace Plugin.Todo
 
 								foreach (var item in listItems)
 								{
-									TodoItems.Add(item.Title);
+									if (item.Status != Microsoft.Graph.TaskStatus.Completed)
+									{
+										TodoItems.Add(item.Title);
+									}
 								}
 							}
 
