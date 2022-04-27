@@ -11,7 +11,14 @@
 			_timer = new Timer(
 				async (object _) =>
 				{
-					await callback(timerIndex);
+					try
+					{
+						await callback(timerIndex);
+					}
+					catch (Exception ex)
+					{
+						Console.Error.Write(ex.ToString());
+					}
 				},
 				new AutoResetEvent(false),
 				TimeSpan.FromMilliseconds(period),
