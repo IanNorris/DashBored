@@ -59,6 +59,8 @@ namespace DashBored.TradingView
 				{
 					await _webSocket.SendAsync(packet, WebSocketMessageType.Text, true, _cancellationToken.Token);
 				}
+
+				await Task.Delay(100);
 			}
 		}
 
@@ -186,6 +188,8 @@ namespace DashBored.TradingView
 				{
 					break;
 				}
+
+				await Task.Delay(100);
 			}
 		}
 
