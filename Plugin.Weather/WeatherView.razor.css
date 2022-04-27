@@ -71,11 +71,13 @@
 
 .weather table tr td.key
 {
+	font-size: 0.75rem;
 	text-align: right;
 }
 
 .weather table tr td.value, .weather table tr th.value
 {
+	font-size: 0.75rem;
 	text-align: left;
 }
 
