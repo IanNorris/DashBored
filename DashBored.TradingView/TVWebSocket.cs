@@ -34,7 +34,7 @@ namespace DashBored.TradingView
 
 		public void ThreadMain()
 		{
-			Main().GetAwaiter().GetResult();
+			ReceiveMain().GetAwaiter().GetResult();
 		}
 
 		public void SendThreadMain()
@@ -46,8 +46,9 @@ namespace DashBored.TradingView
 		{
 			List<byte[]> packetsToSend = null;
 
-			while (_webSocket.State == WebSocketState.Open && !_cancellationToken.IsCancellationRequested)
+			while (_webSocket.State == WebSocketState.Open && !_cancellationToken.IsCancellationRequested && !_hadError)
 			{
+				int index = 0;
 
 				lock (_sendPackets)
 				{
@@ -55,26 +56,55 @@ namespace DashBored.TradingView
 					_sendPackets.Clear();
 				}
 
-				foreach (var packet in packetsToSend)
+				try
 				{
-					await _webSocket.SendAsync(packet, WebSocketMessageType.Text, true, _cancellationToken.Token);
+					foreach (var packet in packetsToSend)
+					{
+						await _webSocket.SendAsync(packet, WebSocketMessageType.Text, true, _cancellationToken.Token);
+						index++;
+					}
+				}
+				catch(WebSocketException)
+				{
+					_hadError = true;
+					return;
 				}
 
 				await Task.Delay(100);
 			}
 		}
 
-		private async Task Main()
+		private async Task ReceiveMain()
+		{
+			do
+			{
+				_hadError = false;
+				await ReceiveMainInner();
+			} while (_hadError);
+		}
+
+		private async Task ReceiveMainInner()
 		{
 			int packetsProcessed = 0;
+			bool setupSend = false;
 
 			await Connect();
 
 			var Buffer = new byte[256 * 1024];
 
-			while(_webSocket.State == WebSocketState.Open && !_cancellationToken.IsCancellationRequested)
+			while(_webSocket.State == WebSocketState.Open && !_cancellationToken.IsCancellationRequested && !_hadError)
 			{
-				var result = await _webSocket.ReceiveAsync(Buffer, _cancellationToken.Token);
+				WebSocketReceiveResult result;
+				try
+				{
+					result = await _webSocket.ReceiveAsync(Buffer, _cancellationToken.Token);
+				}
+				catch(WebSocketException)
+				{
+					_hadError = true;
+					return;
+				}
+
 				if(result != null)
 				{
 					_stream.Write(Buffer, 0, result.Count);
@@ -85,102 +115,7 @@ namespace DashBored.TradingView
 
 						var bufferText = _reader.ReadToEnd();
 
-						while (bufferText.Length > 0)
-						{
-							if (bufferText.Length < 3 || bufferText[0] != '~')
-							{
-								throw new InvalidDataException($"Unable to process packet: {bufferText}");
-							}
-
-							var headerMatch = ParseHeader.Match(bufferText);
-							if (!headerMatch.Success)
-							{
-								throw new InvalidDataException($"Unable to process packet header: {bufferText}");
-							}
-
-							var byteLength = int.Parse(headerMatch.Groups[1].Value);
-							var headerLength = headerMatch.Groups[0].Length;
-
-							var payload = bufferText.Substring(headerLength, byteLength);
-
-							bool processed = false;
-							if (payload.Length > 0)
-							{
-								if (payload[0] == '{')
-								{
-									var payloadTokens = JObject.Parse(payload);
-									if (payloadTokens.ContainsKey("m"))
-									{
-										var packetType = payloadTokens["m"].Value<string>();
-										var parameters = payloadTokens["p"];
-										switch (packetType)
-										{
-											case "qsd":
-												var sessionId = parameters[0].Value<string>();
-												var quote = parameters[1].ToObject<Quote>();
-
-												if (quote.Status == "ok")
-												{
-													if (_sessions.TryGetValue(sessionId, out var sessionHandler))
-													{
-														sessionHandler(quote);
-													}
-
-													processed = true;
-												}
-												else
-												{
-													Console.Error.WriteLine($"Error \"{quote.Status}\" with quote: {quote.Name}");
-													processed = true;
-												}
-
-												break;
-
-											case "quote_completed":
-												processed = true; //think its ok to just continue to receive these?
-												break;
-
-											default:
-												Console.Error.WriteLine($"Unknown packet \"{packetType}\" with payload: ");
-												break;
-
-										}
-									}
-									else
-									{
-										if(payloadTokens.ContainsKey("protocol"))
-										{
-											//Ignore it, its the welcome message
-											processed = true;
-										}
-									}
-								}
-								else if(payload[0] == '~')
-								{
-									//Send a pong response
-									if (payload.StartsWith("~h~"))
-									{
-										QueuePacket(payload);
-										processed = true;
-									}
-								}
-							}
-							bufferText = bufferText.Substring(headerLength + byteLength);
-
-							if (!processed)
-							{
-								Console.Out.WriteLine(payload);
-							}
-
-							packetsProcessed++;
-
-							if(packetsProcessed == 1)
-							{
-								_sendThread.Start();
-
-								QueueMethod("set_auth_token", "unauthorized_user_token");
-							}
-						}
+						packetsProcessed += ProcessPacket(bufferText);
 					}
 				}
 
@@ -189,8 +124,115 @@ namespace DashBored.TradingView
 					break;
 				}
 
-				await Task.Delay(100);
+				if (packetsProcessed > 1 && !setupSend)
+				{
+					_sendThread = new Thread(() => SendThreadMain());
+					_sendThread.Start();
+
+					QueueMethod("set_auth_token", "unauthorized_user_token");
+
+					setupSend = true;
+				}
 			}
+		}
+
+		private void ProcessPacket_qsd(JToken parameters)
+		{
+			var sessionId = parameters[0].Value<string>();
+			var quote = parameters[1].ToObject<Quote>();
+
+			if (quote.Status == "ok")
+			{
+				if (_sessions.TryGetValue(sessionId, out var sessionHandler))
+				{
+					sessionHandler(quote);
+				}
+			}
+			else
+			{
+				Console.Error.WriteLine($"Error \"{quote.Status}\" with quote: {quote.Name}");
+			}
+		}
+
+		private int ProcessPacket(string bufferText)
+		{
+			var packetsProcessed = 0;
+
+			while (bufferText.Length > 0)
+			{
+				if (bufferText.Length < 3 || bufferText[0] != '~')
+				{
+					throw new InvalidDataException($"Unable to process packet: {bufferText}");
+				}
+
+				var headerMatch = ParseHeader.Match(bufferText);
+				if (!headerMatch.Success)
+				{
+					throw new InvalidDataException($"Unable to process packet header: {bufferText}");
+				}
+
+				var byteLength = int.Parse(headerMatch.Groups[1].Value);
+				var headerLength = headerMatch.Groups[0].Length;
+
+				var payload = bufferText.Substring(headerLength, byteLength);
+
+				bool processed = false;
+				if (payload.Length > 0)
+				{
+					if (payload[0] == '{')
+					{
+						var payloadTokens = JObject.Parse(payload);
+						if (payloadTokens.ContainsKey("m"))
+						{
+							var packetType = payloadTokens["m"].Value<string>();
+							var parameters = payloadTokens["p"];
+							switch (packetType)
+							{
+								case "qsd":
+									ProcessPacket_qsd(parameters);
+									processed = true;
+									break;
+
+								case "quote_completed":
+									processed = true; //think its ok to just continue to receive these?
+									break;
+
+								default:
+									Console.Error.WriteLine($"Unknown packet \"{packetType}\" with payload: ");
+									break;
+
+							}
+						}
+						else
+						{
+							if (payloadTokens.ContainsKey("protocol"))
+							{
+								//Ignore it, its the welcome message
+								processed = true;
+							}
+						}
+					}
+					else if (payload[0] == '~')
+					{
+						//Send a pong response
+						if (payload.StartsWith("~h~"))
+						{
+							QueuePacket(payload);
+							processed = true;
+						}
+					}
+				}
+				bufferText = bufferText.Substring(headerLength + byteLength);
+
+				if (!processed)
+				{
+					Console.Out.WriteLine(payload);
+				}
+
+				packetsProcessed++;
+			}
+
+			return packetsProcessed;
 		}
 
 		public void QueuePacket(string content)
@@ -267,6 +309,8 @@ namespace DashBored.TradingView
 		private StreamReader _reader;
 
 		private List<byte[]> _sendPackets = new List<byte[]>();
+		private List<byte[]> _sendPacketsRequeued = new List<byte[]>();
+		private bool _hadError;
 
 		private Dictionary<string, OnQuoteUpdateDelegate> _sessions = new Dictionary<string, OnQuoteUpdateDelegate>();
 	}
