@@ -169,4 +169,9 @@
 		NewSecretValue = null;
 		IsEditing = false;
 	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		await JS.InvokeVoidAsync("onFinishedLoading");
+	}
 }

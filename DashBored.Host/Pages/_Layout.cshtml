@@ -38,13 +38,13 @@
     </div>
     
     <script src="~/lib/bootstrap/js/bootstrap.js"></script>
-    <script src="~/js/main.js"></script>
-
+    
     @foreach(var script in Pages.Scripts)
     {
        <script src="@script"></script>
     }
 
-    <script src="_framework/blazor.server.js"></script>
+    <script autostart="false" src="_framework/blazor.server.js"></script>
+    <script src="~/js/main.js"></script>
 </body>
 </html>
