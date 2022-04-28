@@ -22,14 +22,29 @@ namespace DashBored.TradingView
 
 			_thread = new Thread(() => ThreadMain());
 			_thread.Start();
-
-			_sendThread = new Thread(() => SendThreadMain());
 		}
 
 		private async Task Connect()
 		{
+			if (_webSocket != null)
+			{
+				_webSocket.Dispose();
+			}
+			_webSocket = new ClientWebSocket();
+
 			_webSocket.Options.SetRequestHeader("origin", Origin);
-			await _webSocket.ConnectAsync(new Uri(EndpointUri), _cancellationToken.Token);
+			while (true)
+			{
+				try
+				{
+					await _webSocket.ConnectAsync(new Uri(EndpointUri), _cancellationToken.Token);
+					return;
+				}
+				catch (WebSocketException)
+				{
+					await Task.Delay(15 * 1000);
+				}
+			}
 		}
 
 		public void ThreadMain()
@@ -80,6 +95,11 @@ namespace DashBored.TradingView
 			{
 				_hadError = false;
 				await ReceiveMainInner();
+
+				if (_sendThread != null)
+				{
+					_sendThread.Join();
+				}
 			} while (_hadError);
 		}
 
