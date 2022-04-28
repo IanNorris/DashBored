@@ -1,4 +1,5 @@
 ﻿using DashBored.Host.Models;
+using DashBored.PluginApi;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
@@ -6,27 +7,16 @@ namespace DashBored.Host.Data
 {
 	public class PageService : IDisposable
 	{
-		public PageService(PluginLoader pluginLoader, SecretService secretService)
+		public PageService(ISettingsService settingsService, PluginLoader pluginLoader, SecretService secretService)
 		{
+			_settingsService = settingsService;
 			_pluginLoader = pluginLoader;
 			_secretService = secretService;
 		}
 
 		public async Task LoadPages(IServiceProvider serviceProvider)
 		{
-			var folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DashBored");
-			var configPath = Path.Combine(folderPath, "Layout.json");
-			var secretsPath = Path.Combine(folderPath, "Secrets.json");
-
-			if (!File.Exists(configPath))
-			{
-				Console.Error.WriteLine($"Layout file {configPath} does not exist.");
-				Environment.Exit(1);
-			}
-
-			var fileContent = File.ReadAllText(configPath);
-
-			var layout = JsonConvert.DeserializeObject<Layout>(fileContent);
+			var layout = _settingsService.GetSettingsObject<Layout>("Layout.json", false);
 
 			var page = new Page(layout, _pluginLoader, serviceProvider);
 
@@ -95,6 +85,7 @@ namespace DashBored.Host.Data
 
 		public List<Page> Pages { get; private set; } = new List<Page>();
 
+		private ISettingsService _settingsService;
 		private PluginLoader _pluginLoader;
 		private SecretService _secretService;
 	}

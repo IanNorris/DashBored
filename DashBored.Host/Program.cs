@@ -2,21 +2,10 @@ using DashBored.Host;
 using DashBored.Host.Data;
 using DashBored.Host.Models;
 using DashBored.PluginApi;
-using Newtonsoft.Json;
 
-var folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DashBored");
-Directory.CreateDirectory(folderPath);
+var settingsService = new SettingsService();
 
-var serverConfigPath = Path.Combine(folderPath, "Server.json");
-
-if (!File.Exists(serverConfigPath))
-{
-	Console.Error.WriteLine($"Server config file {serverConfigPath} does not exist.");
-	Environment.Exit(1);
-}
-
-var serverConfigContent = await File.ReadAllTextAsync(serverConfigPath);
-var serverConfig = JsonConvert.DeserializeObject<Server>(serverConfigContent);
+var serverConfig = settingsService.GetSettingsObject<Server>("Server.json", false);
 
 var pluginLoader = new PluginLoader();
 
@@ -37,6 +26,7 @@ builder.WebHost.UseKestrel( k =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddDataProtection();
+builder.Services.AddSingleton<ISettingsService>(settingsService);
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<PluginLoader>();
 builder.Services.AddSingleton<SecretService>();

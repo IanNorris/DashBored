@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
 using DashBored.PluginApi;
 using Microsoft.AspNetCore.DataProtection;
-using Newtonsoft.Json;
 
 namespace DashBored.Host.Data
 {
 	public class SecretService
 	{
-		public SecretService(IDataProtectionProvider dataProtectionProvider)
+		public SecretService(ISettingsService settingsService, IDataProtectionProvider dataProtectionProvider)
 		{
+			_settingsService = settingsService;
 			_dataProtectionProvider = dataProtectionProvider;
 
 			LoadSecrets();
@@ -49,40 +49,31 @@ namespace DashBored.Host.Data
 			return null;
 		}
 
-		public string GetPath()
-		{
-			var folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DashBored");
-			var secretsPath = Path.Combine(folderPath, "Secrets.json");
-
-			return secretsPath;
-		}
-
 		private void LoadSecrets()
 		{
-			var secretsPath = GetPath();
-
-			if (!File.Exists(secretsPath))
-			{
-				_secrets = new Dictionary<string, string>();
-				return;
-			}
-
-			var fileContent = File.ReadAllText(secretsPath);
+			var newSecrets = _settingsService.GetSettingsObject<Dictionary<string, string>>(SecretsName, true);
 
 			lock (this)
 			{
-				_secrets = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileContent);
+				if (newSecrets == null)
+				{
+					_secrets = new Dictionary<string, string>();
+				}
+				else
+				{
+					_secrets = newSecrets;
+				}
 			}
 		}
 
 		private void SaveSecrets()
 		{
-			var secretsPath = GetPath();
-
-			var fileContent = JsonConvert.SerializeObject(_secrets);
-			File.WriteAllText(secretsPath, fileContent);
+			_settingsService.WriteSettingsObject(SecretsName, _secrets);
 		}
 
+		private const string SecretsName = "secrets.json";
+
+		private ISettingsService _settingsService;
 		private IDataProtectionProvider _dataProtectionProvider;
 		private Dictionary<string, string> _secrets = new Dictionary<string, string>();
 	}
