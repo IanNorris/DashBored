@@ -40,8 +40,25 @@
 							<span class="change-pos">-</span>
 						}
 					</td>
+					<td>
+						@if(stock.ExtHoursChangePercentage.HasValue)
+						{
+							if(stock.ExtHoursChangePercentage.Value >= 0)
+							{
+								<span class="ext-change-pos">@stock.ExtHoursChangePercentage.Value.ToString("0.00")%</span>
+							}
+							else
+							{
+								<span class="ext-change-neg">@Math.Abs(stock.ExtHoursChangePercentage.Value).ToString("0.00")%</span>
+							}
+						}
+					</td>
 				</tr>
 			}
 		</table>
+
+		<div class="update-indicator">
+			<span>@Model.UpdatesThisPeriod</span>
+		</div>
 	}
 </div>

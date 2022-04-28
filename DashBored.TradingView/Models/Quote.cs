@@ -18,6 +18,8 @@ namespace DashBored.TradingView.Models
 			ChangePercentage = UpdateIf(ChangePercentage, newData.ChangePercentage);
 			Change = UpdateIf(Change, newData.Change);
 			LogoId = UpdateIf(LogoId, newData.LogoId);
+			ExtHoursChange = UpdateIf(ExtHoursChange, newData.ExtHoursChange);
+			ExtHoursChangePercentage = UpdateIf(ExtHoursChangePercentage, newData.ExtHoursChangePercentage);
 		}
 
 		public QuoteData Clone()
@@ -30,6 +32,8 @@ namespace DashBored.TradingView.Models
 				Description = Description,
 				Price = Price,
 				LogoId = LogoId,
+				ExtHoursChange = ExtHoursChange,
+				ExtHoursChangePercentage = ExtHoursChangePercentage,
 			};
 		}
 
@@ -49,6 +53,11 @@ namespace DashBored.TradingView.Models
 
 		[JsonProperty(PropertyName = "ch")]
 		public decimal? Change { get; set; } = null;
+
+		[JsonProperty(PropertyName = "rch")]
+		public decimal? ExtHoursChange { get; set; } = null;
+		[JsonProperty(PropertyName = "rchp")]
+		public decimal? ExtHoursChangePercentage { get; set; } = null;
 	}
 
 	public class Quote

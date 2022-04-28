@@ -25,3 +25,23 @@
 {
 	color: mediumvioletred;
 }
+
+.ext-change-pos
+{
+	color: lawngreen;
+	opacity: 50%;
+}
+
+.ext-change-neg
+{
+	color: mediumvioletred;
+	opacity: 50%;
+}
+
+.update-indicator
+{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	padding: 0.5rem;
+}

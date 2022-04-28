@@ -16,6 +16,7 @@ namespace Plugin.Portfolio
 
 		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
 		{
+			{ 0, 1 * 1000 } // 1s
 		};
 
 		public IEnumerable<Secret> Secrets => new List<Secret>
@@ -39,11 +40,29 @@ namespace Plugin.Portfolio
 
 		public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
 		{
+			_hasSession = false;
 			_webSocket = new TVWebSocket();
+			StartQuote();
+
+			await UpdateData();
+
+			Error = null;
+			return true;
+		}
+
+		private void StartQuote()
+		{
+			_hasSession = true;
+			_lastUpdate = DateTime.UtcNow;
+
 			var sessionId = _webSocket.CreateQuoteSession((data) =>
 			{
 				lock (StockData)
 				{
+					_hasSession = true;
+					_lastUpdate = DateTime.UtcNow;
+					_updatesThisPeriod++;
+
 					if (StockData.TryGetValue(data.Name, out var existing))
 					{
 						existing.Data.UpdateFrom(data.Data);
@@ -55,7 +74,7 @@ namespace Plugin.Portfolio
 				}
 
 				OnDataChanged?.Invoke();
-			}, new string[] { "lp", "ch", "chp", "description", "status", "short_name", "logoid" });
+			}, new string[] { "chp", "description", "status", "short_name", "logoid", "rchp" });
 
 			if (_data.Stocks != null)
 			{
@@ -64,15 +83,26 @@ namespace Plugin.Portfolio
 					_webSocket.AddSymbol(sessionId, stock);
 				}
 			}
-
-			await UpdateData();
-
-			Error = null;
-			return true;
 		}
 
 		public Task<bool> OnTimer(int _)
 		{
+			var currentTime = DateTime.UtcNow;
+			var lastUpdate = _lastUpdate;
+			var delta = currentTime - lastUpdate;
+			if (_hasSession && delta > TimeSpan.FromSeconds(10))
+			{
+				Console.Out.WriteLine($"[TradingView] {delta.TotalSeconds} elapsed without updates, restarting quote.");
+
+				_hasSession = false;
+
+				StartQuote();
+			}
+			UpdatesThisPeriod = _updatesThisPeriod;
+			_updatesThisPeriod = 0;
+
+			OnDataChanged?.Invoke();
+
 			return Task.FromResult(true);
 		}
 
@@ -97,6 +127,11 @@ namespace Plugin.Portfolio
 		}
 
 		private TVWebSocket _webSocket;
+		private DateTime _lastUpdate;
+		private bool _hasSession;
+		private int _updatesThisPeriod;
+
+		public int UpdatesThisPeriod { get; set; }
 
 		public Dictionary<string, Quote> StockData { get; set; } = new Dictionary<string, Quote>();
 	}
