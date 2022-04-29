@@ -71,7 +71,7 @@ namespace DashBored.Host.Data
 			_settingsService.WriteSettingsObject(SecretsName, _secrets);
 		}
 
-		private const string SecretsName = "secrets.json";
+		private const string SecretsName = "Secrets.json";
 
 		private ISettingsService _settingsService;
 		private IDataProtectionProvider _dataProtectionProvider;
