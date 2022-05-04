@@ -57,6 +57,22 @@
 			}
 		</table>
 
+		<p>Gains:</p>
+		<table class="table table-striped tabulator">	
+			@foreach(var gain in Model.GetGains())
+			{
+				<tr>
+					<td>@gain.Symbol</td>
+					<td>
+						@gain.Date.ToString("yyyy-MM-dd")
+					</td>
+					<td>
+						@gain.Value.ToString("0.00") @gain.Currency
+					</td>
+				</tr>
+			}
+		</table>
+
 		<div class="update-indicator">
 			<span>@Model.UpdatesThisPeriod</span>
 		</div>
