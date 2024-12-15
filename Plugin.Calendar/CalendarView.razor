@@ -59,6 +59,7 @@
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		await OnDataUpdate();
+		await base.OnAfterRenderAsync(firstRender);
 	}
 
 	public void Dispose()

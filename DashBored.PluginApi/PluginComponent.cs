@@ -18,9 +18,16 @@ namespace DashBored.PluginApi
 		[Inject]
 		public IServer Server { get; set; }
 
+		private Uri TargetPopupUri;
+
 		public async Task OpenBrowserPopup(Uri targetUri)
 		{
-			await JSRuntime.InvokeVoidAsync("openWindow", targetUri.ToString());
+			TargetPopupUri = targetUri;
+
+			_ = InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
 		}
 
 		protected override void OnParametersSet()
@@ -31,6 +38,15 @@ namespace DashBored.PluginApi
 				{
 					InvokeAsync(StateHasChanged);
 				};
+			}
+		}
+
+		protected override async Task OnAfterRenderAsync(bool firstRender)
+		{
+			if(TargetPopupUri != null)
+			{
+				await JSRuntime.InvokeVoidAsync("openWindow", TargetPopupUri.ToString());
+				TargetPopupUri = null;
 			}
 		}
 	}
