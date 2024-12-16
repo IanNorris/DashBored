@@ -1,228 +1,216 @@
 ﻿using DashBored.MicrosoftGraph;
 using DashBored.PluginApi;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Graph;
+using Microsoft.Graph.Models;
 using Plugin.Calendar.Models;
+using static DashBored.MicrosoftGraph.Delegates;
 
 namespace Plugin.Calendar
 {
-	public class Calendar : IPlugin
-	{
-		public static Type DataType => typeof(CalendarData);
-		public Type RazorType => typeof(CalendarView);
-		public CardStyle CardStyle => new CardStyle
-		{
-			Classes = "calendar-card",
-			Padding = true,
-		};
+    public class Calendar : IPlugin
+    {
+        public static Type DataType => typeof(CalendarData);
+        public Type RazorType => typeof(CalendarView);
+        public CardStyle CardStyle => new CardStyle
+        {
+            Classes = "calendar-card",
+            Padding = true,
+        };
 
-		public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
-		{
-			{ 0, 15 * 60 * 1000 }, //15m
-		};
+        public IDictionary<int, int> TimerFrequencies => new Dictionary<int, int>
+        {
+            { 0, 15 * 60 * 1000 }, //15m
+        };
 
-		public IEnumerable<Secret> Secrets => null;
+        public IEnumerable<Secret> Secrets => null;
 
-		public IEnumerable<string> ScriptPaths => new List<string>
-		{
-			"fullcalendar/lib/main.js",
-			"fullcalendar/lib/locales-all.js",
-			"calendar.js",
-		};
+        public IEnumerable<string> ScriptPaths => new List<string>
+        {
+            "fullcalendar/lib/main.js",
+            "fullcalendar/lib/locales-all.js",
+            "calendar.js",
+        };
 
-		public IEnumerable<string> StylesheetPaths => new List<string>
-		{
-			"fullcalendar/lib/main.css",
-			"calendar.css",
-		};
+        public IEnumerable<string> StylesheetPaths => new List<string>
+        {
+            "fullcalendar/lib/main.css",
+            "calendar.css",
+        };
 
-		public string Error { get; set; }
+        public string Error { get; set; }
 
-		public List<CalendarEvent> CalendarEvents { get; set; } = new List<CalendarEvent>();
-		public Dictionary<string, string> CalendarNames { get; set; } = new Dictionary<string, string>();
-		public List<FullCalendarEvent> FullCalendarEvents { get; set; } = new List<FullCalendarEvent>();
+        public List<CalendarEvent> CalendarEvents { get; set; } = new List<CalendarEvent>();
+        public Dictionary<string, string> CalendarNames { get; set; } = new Dictionary<string, string>();
+        public List<FullCalendarEvent> FullCalendarEvents { get; set; } = new List<FullCalendarEvent>();
 
-		public string Title { get; set; }
+        public string Title { get; set; }
 
-		public GraphError GraphError { get; set; }
+        public GraphError GraphError { get; set; } = GraphError.NeedsLogin;
 
-		public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
+        public IPlugin.OnDataChangedDelegate OnDataChanged { get; set; }
 
-		public GraphAuthenticationProviderPublic.OnLoginPromptDelegate OnLoginPrompt { get; set; }
+        public OnLoginPromptDelegate OnLoginPrompt { get; set; }
 
-		private IServer _server;
+        private IPluginServerEnvironment _server;
 
-		public Calendar(IServer server, CalendarData data, string title)
-		{
-			_server = server;
-			_data = data;
-			Title = title;
-		}
+        public Calendar(IPluginServerEnvironment server, CalendarData data, string title)
+        {
+            _server = server;
+            _data = data;
+            Title = title;
+        }
 
-		public async Task Login()
-		{
-			await _client.AcquireToken(true);
+        public async Task Login()
+        {
+            GraphError = await _client.AcquireToken(true) ? GraphError.Success : GraphError.NeedsLogin;
+            await OnTimer(0);
+        }
 
-			await OnTimer(0);
-		}
+        public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
+        {
+            _client = new GraphClient(
+                pluginSecrets,
+                _data.AzureAD,
+                _server,
+                _scopes,
+                (errorType, message) =>
+                {
+                    GraphError = errorType;
+                    Error = message;
+                    OnDataChanged?.Invoke();
+                },
+                async (targetUri, redirectUri, cancellationToken) =>
+                {
+                    return await OnLoginPrompt(targetUri, redirectUri, cancellationToken);
+                }
+            );
 
-		public async Task<bool> OnInitialize(IPluginSecrets pluginSecrets)
-		{
-			_client = new GraphClient(pluginSecrets, _data.AzureAD, _scopes, _server, (errorType, message) =>
-			{
-				GraphError = errorType;
-				Error = message;
+            GraphError = await _client.AcquireToken(false) ? GraphError.Success : GraphError.NeedsLogin;
 
-				OnDataChanged?.Invoke();
-			},
-			async (targetUri, redirectUri, cancellationToken) =>
-			{
-				return await OnLoginPrompt(targetUri, redirectUri, cancellationToken);
-			});
+            await OnTimer(0);
+            return true;
+        }
 
-			await OnTimer(0);
+        public async Task<bool> OnTimer(int _)
+        {
+            if (GraphError == GraphError.Success || GraphError == GraphError.Error)
+            {
+                try
+                {
+                    var calendars = await _client.Client.Me.Calendars.GetAsync();
 
-			return true;
-		}
+                    var newCalendarEvents = new List<CalendarEvent>();
+                    var newCalendarNames = new Dictionary<string, string>();
 
-		public async Task<bool> OnTimer(int _)
-		{
-			//Don't retry on FatalError or NeedsAuth.
-			if(GraphError == GraphError.Success || GraphError == GraphError.Error)
-			{
-				try
-				{
-					var queryRange = new List<QueryOption>()
-					{
-						new QueryOption("startDateTime", DateTime.UtcNow.AddDays(-1).ToString("O")),
-						new QueryOption("endDateTime", DateTime.UtcNow.AddDays(8).ToString("O")),
-					};
+                    var orderedCalendars = calendars.Value?.OrderBy(c => c.Name);
 
-					var calendars = await _client.Client.Me.Calendars.Request().GetAsync();
+                    int colourIndex = 0;
+                    foreach (var calendar in orderedCalendars)
+                    {
+                        string color = null;
+                        if (_data.Calendars.TryGetValue(calendar.Name, out var calendarSettings))
+                        {
+                            color = calendarSettings.Color;
+                        }
 
-					var newCalendarEvents = new List<CalendarEvent>();
-					var newCalendarNames = new Dictionary<string, string>();
+                        if (color == null)
+                        {
+                            color = _colours[(colourIndex++) % _colours.Length];
+                        }
 
-					var orderedCalendars = calendars.OrderBy(c => c.Name);
+                        newCalendarNames.Add(calendar.Name, color);
 
-					int colourIndex = 0;
-					foreach (var calendar in orderedCalendars)
-					{
-						string color = null;
-						if(_data.Calendars.TryGetValue(calendar.Name, out var calendarSettings))
-						{
-							color = calendarSettings.Color;
-						}
-						
-						if(color == null)
-						{
-							color = _colours[(colourIndex++) % _colours.Length];
-						}
+                        var calendarData = await _client.Client.Me.Calendars[calendar.Id].CalendarView.GetAsync((requestConfiguration) =>
+                        {
+                            requestConfiguration.QueryParameters.StartDateTime = DateTime.UtcNow.AddDays(-1).ToString("O");
+                            requestConfiguration.QueryParameters.EndDateTime = DateTime.UtcNow.AddDays(8).ToString("O");
+                        });
 
-						newCalendarNames.Add(calendar.Name, color);
+                        if (calendarData != null)
+                        {
+                            foreach (var e in calendarData.Value)
+                            {
+                                if (e.IsCancelled.GetValueOrDefault() || e.IsDraft.GetValueOrDefault())
+                                    continue;
 
-						var calendarData = await _client.Client.Me.Calendars[calendar.Id].CalendarView.Request(queryRange).GetAsync();
-						var calendarEvents = calendarData;
+                                if (e.ResponseStatus?.Response == ResponseType.Declined)
+                                    continue;
 
-						if (calendarEvents != null)
-						{
-							var pageIterator = PageIterator<Event>.CreatePageIterator(
-								_client.Client, calendarEvents,
-								e =>
-								{
-									if(e.IsCancelled.GetValueOrDefault() || e.IsDraft.GetValueOrDefault())
-									{
-										return true;
-									}
+                                var newEvent = new CalendarEvent
+                                {
+                                    Title = e.Subject,
+                                    Color = color,
+                                    StartTime = DateTime.Parse(e.Start.DateTime),
+                                    EndTime = DateTime.Parse(e.End.DateTime),
+                                    AllDay = e.IsAllDay.GetValueOrDefault(),
+                                };
 
-									if (e.ResponseStatus.Response == ResponseType.Declined)
-									{
-										return true;
-									}
+                                var existing = newCalendarEvents.FirstOrDefault(c =>
+                                          c.StartTime == newEvent.StartTime
+                                       && c.EndTime == newEvent.EndTime
+                                       && c.Title == newEvent.Title
+                                       && c.AllDay == newEvent.AllDay);
 
-									var newEvent = new CalendarEvent
-									{
-										Title = e.Subject,
-										Color = color,
-										StartTime = DateTime.Parse(e.Start.DateTime),
-										EndTime = DateTime.Parse(e.End.DateTime),
-										AllDay = e.IsAllDay.GetValueOrDefault(),
-									};
+                                if (existing == null)
+                                {
+                                    newCalendarEvents.Add(newEvent);
+                                }
+                            }
+                        }
+                    }
 
-									var existing = newCalendarEvents.FirstOrDefault(c =>
-										  c.StartTime == newEvent.StartTime
-									   && c.EndTime == newEvent.EndTime
-									   && c.Title == newEvent.Title
-									   && c.AllDay == newEvent.AllDay);
+                    lock (CalendarEvents)
+                    {
+                        CalendarEvents.Clear();
+                        CalendarEvents.AddRange(newCalendarEvents);
+                    }
 
-									if (existing == null)
-									{
-										newCalendarEvents.Add(newEvent);
-									}
+                    lock (CalendarNames)
+                    {
+                        CalendarNames.Clear();
+                        foreach (var item in newCalendarNames)
+                        {
+                            CalendarNames.Add(item.Key, item.Value);
+                        }
+                    }
 
-									return true;
-								}
-							);
+                    lock (FullCalendarEvents)
+                    {
+                        FullCalendarEvents.Clear();
 
-							await pageIterator.IterateAsync();
-						}
-					}
+                        foreach (var calendarEvent in CalendarEvents)
+                        {
+                            var newFullCalendarEvent = new FullCalendarEvent
+                            {
+                                Title = calendarEvent.Title,
+                                Start = calendarEvent.StartTime.ToLocalTime(),
+                                End = calendarEvent.EndTime.ToLocalTime(),
+                                ClassName = $"calendar-event-{calendarEvent.Color}",
+                                AllDay = calendarEvent.AllDay,
+                            };
 
-					lock (CalendarEvents)
-					{
-						CalendarEvents.Clear();
+                            FullCalendarEvents.Add(newFullCalendarEvent);
+                        }
+                    }
 
-						CalendarEvents.AddRange(newCalendarEvents);
-					}
+                    OnDataChanged?.Invoke();
+                }
+                catch
+                {
+                    if (GraphError == GraphError.Success)
+                    {
+                        throw;
+                    }
+                }
+            }
 
-					lock(CalendarNames)
-					{
-						CalendarNames.Clear();
+            return true;
+        }
 
-						foreach(var item in newCalendarNames)
-						{
-							CalendarNames.Add(item.Key, item.Value);
-						}
-					}
+        private GraphClient _client;
+        private CalendarData _data;
 
-					lock(FullCalendarEvents)
-					{
-						FullCalendarEvents.Clear();
-
-						foreach(var calendarEvent in CalendarEvents)
-						{
-							var newFullCalendarEvent = new FullCalendarEvent
-							{
-								Title = calendarEvent.Title,
-								Start = calendarEvent.StartTime.ToLocalTime(),
-								End = calendarEvent.EndTime.ToLocalTime(),
-								ClassName = $"calendar-event-{calendarEvent.Color}",
-								AllDay = calendarEvent.AllDay,
-							};
-
-							FullCalendarEvents.Add(newFullCalendarEvent);
-						}
-					}
-
-					OnDataChanged?.Invoke();
-				}
-				catch
-				{
-					if(GraphError == GraphError.Success)
-					{
-						throw;
-					}
-				}
-			}
-
-			return true;
-		}
-
-		private GraphClient _client;
-		private CalendarData _data;
-
-		private string[] _colours = { "blue", "green", "red", "linen", "dgreen" };
-
-		private string[] _scopes = { "email", "profile", "offline_access", "User.Read", "Calendars.Read", "Calendars.Read.Shared" };
-	}
+        private string[] _colours = { "blue", "green", "red", "linen", "dgreen" };
+        private string[] _scopes = { "email", "profile", "offline_access", "User.Read", "Calendars.Read", "Calendars.Read.Shared" };
+    }
 }

@@ -246,12 +246,6 @@ namespace Plugin.Weather
 			var humidity = today["humidity"].ToString("N0");
 			AddRowValue(ref output, "Humidity", $"{humidity}%");
 
-			var grassIndex = (int)today["grassIndex"];
-			AddRowValue(ref output, "Grass Pollen", GetBadge(grassIndex));
-
-			var treeIndex = (int)today["treeIndex"];
-			AddRowValue(ref output, "Tree Pollen", GetBadge(treeIndex));
-
 			var uvHealth = (int)today["uvHealthConcern"];
 			AddRowValue(ref output, "UV Health", GetBadge(uvHealth));
 

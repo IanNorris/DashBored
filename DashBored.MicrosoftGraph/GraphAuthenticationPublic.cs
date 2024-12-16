@@ -3,17 +3,16 @@ using DashBored.PluginApi;
 using Microsoft.Graph;
 using DashBored.MicrosoftGraph.Models;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Abstractions;
+using static DashBored.MicrosoftGraph.Delegates;
+using System.Linq;
 
 namespace DashBored.MicrosoftGraph
 {
-	public class GraphAuthenticationProviderPublic : IAuthenticationProvider
+    public class GraphAuthenticationProviderPublic : IAuthenticationProvider
 	{
-		public delegate void OnAuthErrorDelegate(GraphError errorType, string message);
-		public delegate Task<Uri> OnLoginPromptDelegate(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
-
-		public GraphAuthenticationProviderPublic(IPluginSecrets secrets, AzureAD azureAD, string[] scopes, IServer server, OnAuthErrorDelegate onAuthError, OnLoginPromptDelegate onLoginPrompt)
+		public GraphAuthenticationProviderPublic(IPluginSecrets secrets, AzureAD azureAD, IPluginServerEnvironment server, string[] scopes, OnAuthErrorDelegate onAuthError, OnLoginPromptDelegate onLoginPrompt)
 		{
 			_clientId = azureAD.ClientId;
 			_tenantId = azureAD.TenantId;
@@ -22,23 +21,9 @@ namespace DashBored.MicrosoftGraph
 			_scopes = scopes;
 			_secrets = secrets;
 
-			var listenAddress = server.Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault(a => a.StartsWith("https://"));
-
-			if(listenAddress == null)
-			{
-				listenAddress = server.Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault(a => a.StartsWith("http://"));
-			}
-
-			if(!listenAddress.EndsWith('/'))
-			{
-				listenAddress += "/";
-			}
-
-			listenAddress = listenAddress.Replace("[::]", "localhost");
-
 			_clientApplication = PublicClientApplicationBuilder.Create(_clientId)
 			   .WithClientId(_clientId)
-			   .WithRedirectUri($"{listenAddress}AuthRedirect")
+			   .WithRedirectUri($"{server.GetListenAddress()}AuthRedirect")
 			   .WithTenantId(_tenantId)
 			   .Build();
 
@@ -126,23 +111,23 @@ namespace DashBored.MicrosoftGraph
 			return false;
 		}
 
-		public async Task AuthenticateRequestAsync(HttpRequestMessage request)
-		{
-			if (await AcquireToken(false))
-			{
-				if (request.Headers.Contains("Authorization"))
-				{
-					request.Headers.Remove("Authorization");
-				}
-				request.Headers.Add("Authorization", _authorizationHeader);
-			}
-			else
-			{
-				throw new UnauthorizedAccessException();
-			}
-		}
+        public async Task AuthenticateRequestAsync(RequestInformation request, Dictionary<string, object> additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
+        {
+            if (await AcquireToken(false))
+            {
+                if (request.Headers.TryGetValue("Authorization", out var authHeader))
+                {
+                    request.Headers.Remove("Authorization");
+                }
+                request.Headers.Add("Authorization", _authorizationHeader);
+            }
+            else
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
 
-		private readonly string _clientId;
+        private readonly string _clientId;
 		private readonly string _tenantId;
 		private readonly string[] _scopes;
 

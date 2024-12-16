@@ -28,6 +28,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDataProtection();
 builder.Services.AddSingleton<ISettingsService>(settingsService);
 builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<IPluginServerEnvironment, ServerEnvironment>();
 builder.Services.AddSingleton<PluginLoader>();
 builder.Services.AddSingleton<SecretService>();
 builder.Services.AddSingleton<PageService>();

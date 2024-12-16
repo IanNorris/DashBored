@@ -2,7 +2,7 @@
 using DashBored.PluginApi;
 using Microsoft.Graph;
 using DashBored.MicrosoftGraph.Models;
-using Microsoft.AspNetCore.Hosting.Server;
+using static DashBored.MicrosoftGraph.Delegates;
 
 namespace DashBored.MicrosoftGraph
 {
@@ -10,18 +10,18 @@ namespace DashBored.MicrosoftGraph
 	{
 		public GraphClient(
 			IPluginSecrets pluginSecrets, 
-			AzureAD azureAD, 
-			string[] scopes, 
-			IServer server,
-			GraphAuthenticationProviderPublic.OnAuthErrorDelegate onAuthenticationError,
-			GraphAuthenticationProviderPublic.OnLoginPromptDelegate onLoginPrompt)
+			AzureAD azureAD,
+            IPluginServerEnvironment server,
+            string[] scopes,
+			OnAuthErrorDelegate onAuthenticationError,
+			OnLoginPromptDelegate onLoginPrompt)
 		{
 			_onAuthenticationError = onAuthenticationError;
 
-			_authProvider = new GraphAuthenticationProviderPublic(pluginSecrets, azureAD, scopes, server, _onAuthenticationError, onLoginPrompt);
+			_authProvider = new GraphAuthenticationProviderPublic(pluginSecrets, azureAD, server, scopes, _onAuthenticationError, onLoginPrompt);
 
-			_httpClient = GraphClientFactory.Create(_authProvider);
-			_client = new GraphServiceClient(_httpClient);
+			_httpClient = GraphClientFactory.Create();
+			_client = new GraphServiceClient(_httpClient, _authProvider);
 		}
 
 		public async Task<bool> AcquireToken(bool interactive)
@@ -34,6 +34,6 @@ namespace DashBored.MicrosoftGraph
 		private GraphServiceClient _client;
 		private HttpClient _httpClient;
 		private GraphAuthenticationProviderPublic _authProvider;
-		private GraphAuthenticationProviderPublic.OnAuthErrorDelegate _onAuthenticationError;
+		private OnAuthErrorDelegate _onAuthenticationError;
 	}
 }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Identity.Client.Extensibility;
-using static DashBored.MicrosoftGraph.GraphAuthenticationProviderPublic;
+using static DashBored.MicrosoftGraph.Delegates;
 
 namespace DashBored.MicrosoftGraph
 {
