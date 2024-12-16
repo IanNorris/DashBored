@@ -20,6 +20,11 @@
     align-content: center !important;
 }
 
+.fc-scroller
+{
+    overflow: hidden;
+}
+
 .calendar-card
 {
     padding: 0px;

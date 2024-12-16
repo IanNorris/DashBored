@@ -9,7 +9,7 @@
 	@if(Model.GraphError == DashBored.MicrosoftGraph.GraphError.NeedsLogin)
 	{
 		<div class="alert alert-warning error-message" role="alert">
-            <p>No account signed in.</p>
+			<p>No account signed in.</p>
 			<button type="button" class="btn btn-primary btn-lg" @onclick="@(e => Model.Login())">Sign in</button>
 		</div>
 	}
@@ -21,10 +21,11 @@
 
 @code{
 	ElementReference FullCalendar;
+	bool IsInitialized = false;
 
 	async Task OnDataUpdate()
 	{
-		if (Model.GraphError != DashBored.MicrosoftGraph.GraphError.NeedsLogin)
+		if (Model.GraphError == DashBored.MicrosoftGraph.GraphError.Success && IsInitialized)
 		{
 			await JS.InvokeVoidAsync(
 				"insertCalendar",
@@ -58,6 +59,8 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		IsInitialized = true;
+
 		await OnDataUpdate();
 		await base.OnAfterRenderAsync(firstRender);
 	}
